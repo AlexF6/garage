@@ -1,0 +1,16 @@
+{
+	"model": {
+		"type": "minecraft:model",
+		"model": "garage:item/car",
+		"tints": [
+			{
+				"type": "minecraft:dye",
+				"default": -3661529
+			},
+			{
+				"type": "minecraft:constant",
+				"value": -1
+			}
+		]
+	}
+}
