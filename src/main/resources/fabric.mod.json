@@ -3,7 +3,7 @@
 	"id": "garage",
 	"version": "${version}",
 	"name": "Garage",
-	"description": "Vehículos para Minecraft. Incluye un Jeep Willys \"Yipao\" de 4 asientos con combustible, baúl, colores y bocina.",
+	"description": "Vehículos para Minecraft. Incluye un Jeep Willys \"Yipao\" de 4 asientos, una moto Enduro (Yamaha XTZ 125) de 2 asientos y un motocarro (Bajaj RE / \"Torito\") de 3 asientos, con combustible, baúl, colores y bocina.",
 	"authors": [
 		"AlexF6"
 	],
@@ -27,6 +27,6 @@
 		"fabricloader": ">=0.19.5",
 		"minecraft": "~26.3",
 		"java": ">=25",
-		"fabric-api": "*"
+		"fabric-api": ">=0.165.2"
 	}
 }

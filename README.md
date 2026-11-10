@@ -1,18 +1,18 @@
 # Garage
 
-Fabric, Minecraft 26.3, Java 25. Vehículos para Minecraft. Por ahora trae un Jeep Willys "Yipao" cafetero de 4
-asientos, con combustible, baúl, colores, bocina y bandera de Colombia; el mod está pensado para sumar más vehículos.
-Hay que tener el mod en cliente y servidor.
+Fabric, Minecraft 26.3, Java 25. Vehículos para Minecraft. Incluye un Jeep Willys "Yipao" cafetero de 4
+asientos, una moto Enduro (Yamaha XTZ 125) de 2 asientos y un Motocarro urbano (Bajaj RE / "Torito") de 3 asientos, con combustible, baúl, colores, bocina y física reactiva;
+el mod está pensado para sumar más vehículos. Hay que tener el mod en cliente y servidor.
 
 ## Uso
 
-- **Poner el carro:** clic derecho con el ítem sobre un bloque. Queda mirando hacia donde miras.
-- **Subir:** clic derecho sobre el carro. El primero en subir conduce; caben 4.
-- **Bajar:** shift. Sales por la puerta de tu asiento; si ese lado está tapado, por el otro.
+- **Poner el vehículo:** clic derecho con el ítem sobre un bloque. Queda mirando hacia donde miras.
+- **Subir:** clic derecho sobre el vehículo. El primer jugador en subir conduce (4 asientos en el carro, 2 en tándem en la moto y 3 en el motocarro).
+- **Bajar:** shift. Sales por la puerta o costado de tu asiento; si ese lado está tapado, por el otro.
 - **Combustible:** clic derecho con carbón o carbón vegetal. Cada unidad da 80 s de acelerador y el tanque lleno 10 min.
   Solo se gasta mientras aceleras o retrocedes. El nivel aparece en la barra de acción mientras conduces.
 - **Color:** clic derecho con cualquier tinte.
-- **Baúl:** shift + clic derecho sobre el carro (27 espacios, como un cofre).
+- **Baúl / alforja:** shift + clic derecho sobre el vehículo (27 espacios en el carro, 18 en el motocarro y 9 en la moto).
 - **Romperlo:** golpéalo como a un bote. Suelta el ítem con su color y su nombre, y lo que haya en el baúl.
 
 ### Manejo
@@ -24,7 +24,7 @@ Hay que tener el mod en cliente y servidor.
 | Espacio | Freno de mano: frena y, en curva, derrapa |
 | H | Bocina (se puede cambiar en Controles → Garage) |
 
-- Velocidad máxima de unos 43 km/h hacia adelante y 14 km/h en reversa. Sube bloques completos sin saltar.
+- Velocidad máxima hacia adelante de unos 43 km/h en el carro (14 km/h en reversa), 68 km/h en la moto Enduro y 52 km/h en el motocarro. Todos suben bloques completos sin saltar.
 - La dirección depende de la velocidad: a baja velocidad gira cerrado (radio de unos 2.5 bloques) y a alta se endurece.
   En reversa el giro se invierte, como en un carro real.
 - En el agua se hunde despacio y no tiene tracción. El carro amortigua las caídas: los pasajeros no reciben daño.
@@ -36,6 +36,8 @@ Hay que tener el mod en cliente y servidor.
 | Ítem | Receta |
 |---|---|
 | Carro | `IGI` / `IFI` / `KKK` con lingotes de hierro (`I`), panel de vidrio (`G`), horno (`F`) y lana negra (`K`) |
+| Moto | ` H ` / `IFI` / `KWK` con barrotes de hierro (`H`), lingotes (`I`), horno (`F`), lana negra (`K`) y cuero (`W`) |
+| Motocarro | `LGL` / `IFI` / `KCK` con cuero (`L`), vidrio (`G`), lingotes (`I`), horno (`F`), lana negra (`K`) y cofre (`C`) |
 
 ## Configuración
 
@@ -89,16 +91,18 @@ movimiento observado, así que se ven igual para todos sin paquetes extra.
 
 | Clase | Responsabilidad |
 |---|---|
-| `CarEntity` | Entidad: manejo, combustible, atropellos, asientos, bajada lateral, baúl e interacciones |
+| `CarEntity`, `MotorcycleEntity`, `MotocarroEntity` | Entidades: manejo, combustible, atropellos, asientos, alforja/baúl e interacciones |
 | `physics/CarPhysics` | Funciones puras del manejo: velocidad, volante, giro tipo bicicleta y derrape |
-| `physics/CarTuning`, `CarInput` | Parámetros de un vehículo (con validación) y entrada inmutable del conductor |
+| `physics/CarTuning`, `CarInput` | Parámetros de un vehículo (`WILLYS`, `ENDURO`, `MOTOCARRO`) y entrada inmutable del conductor |
 | `physics/Suspension` | Resortes del cabeceo, el balanceo y el rebote (solo visual) |
 | `CarConfig` | Lee, completa y valida `config/garage.json` |
-| `CarItem`, `ModItems`, `ModEntities` | Ítem que pone el carro (conserva el color), registros y asientos |
+| `CarItem`, `ModItems`, `ModEntities` | Ítem parametrizado que pone cualquier vehículo (conserva color y nombre), registros y asientos |
 | `HornPayload` | Paquete cliente → servidor de la bocina |
 | `client/GarageClient` | Teclas del conductor, bocina y arranque del sonido del motor |
-| `client/CarModels`, `CarRenderer` | Modelo en dos capas (carrocería teñida y detalles), ruedas, suspensión y bandera |
-| `client/CarEngineSound` | Motor en bucle cuyo tono sube con la velocidad |
+| `client/CarModels`, `CarRenderer` | Modelo del Jeep en dos capas, ruedas, suspensión y bandera |
+| `client/MotorcycleModels`, `MotorcycleRenderer` | Modelo de la moto XTZ en dos capas, horquilla inclinada (rake), ruedas y tumbada (lean) |
+| `client/MotocarroModels`, `MotocarroRenderer` | Modelo del motocarro en dos capas, tren delantero Delta, suspensión y balanceo centrífugo |
+| `client/CarEngineSound` | Motor en bucle cuyo tono sube con la velocidad según el rango de cada vehículo |
 
 Para agregar otro vehículo basta otra instancia de `CarTuning`, sin tocar `CarPhysics`.
 
