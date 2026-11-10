@@ -30,16 +30,23 @@ public class GarageClient implements ClientModInitializer {
     public void onInitializeClient() {
         ModelLayerRegistry.registerModelLayer(CarModels.BODY, CarModels::createBodyLayer);
         ModelLayerRegistry.registerModelLayer(CarModels.TRIM, CarModels::createTrimLayer);
-        EntityRendererRegistry.register(ModEntities.CAR, CarRenderer::new);
+        ModelLayerRegistry.registerModelLayer(MotorcycleModels.BODY, MotorcycleModels::createBodyLayer);
+        ModelLayerRegistry.registerModelLayer(MotorcycleModels.TRIM, MotorcycleModels::createTrimLayer);
+        ModelLayerRegistry.registerModelLayer(MotocarroModels.BODY, MotocarroModels::createBodyLayer);
+        ModelLayerRegistry.registerModelLayer(MotocarroModels.TRIM, MotocarroModels::createTrimLayer);
 
-        // Un sonido de motor por carro cargado; se detiene solo cuando el carro desaparece
+        EntityRendererRegistry.register(ModEntities.CAR, CarRenderer::new);
+        EntityRendererRegistry.register(ModEntities.MOTORCYCLE, MotorcycleRenderer::new);
+        EntityRendererRegistry.register(ModEntities.MOTOCARRO, MotocarroRenderer::new);
+
+        // Un sonido de motor por vehículo cargado; se detiene solo cuando el vehículo desaparece
         ClientEntityEvents.ENTITY_LOAD.register((entity, level) -> {
             if (entity instanceof CarEntity car) {
                 Minecraft.getInstance().getSoundManager().play(new CarEngineSound(car));
             }
         });
 
-        // Igual que LocalPlayer con el bote: pasa las teclas del conductor al carro antes de cada tick
+        // Pasa las teclas del conductor al vehículo antes de cada tick
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
             LocalPlayer player = client.player;
             if (player == null) return;
@@ -52,7 +59,7 @@ public class GarageClient implements ClientModInitializer {
                 }
             } else {
                 while (HORN.consumeClick()) {
-                    // descartar pulsaciones fuera del carro
+                    // descartar pulsaciones fuera del vehículo
                 }
             }
         });

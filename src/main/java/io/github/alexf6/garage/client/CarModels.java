@@ -120,16 +120,20 @@ public final class CarModels {
 
         // Ruedas redondeadas: banda de rodadura en cruz + la misma cruz rotada 45° (perfil de 16 lados) y una
         // tapa plana a cada lado con la cara blanca; el pivote va en el eje para rodar y girar.
-        CubeListBuilder tread = cube(194, 28)
-                .addBox(-1.9F, -6, -2.5F, 3.8F, 12, 5)
-                .addBox(-1.9F, -2.5F, -6, 3.8F, 5, 12);
+        // Anchos escalonados en X para evitar caras laterales coplanares (z-fighting).
+        CubeListBuilder tread0 = cube(194, 28)
+                .addBox(-1.95F, -6, -2.5F, 3.9F, 12, 5)
+                .addBox(-1.90F, -2.5F, -6, 3.8F, 5, 12);
+        CubeListBuilder tread45 = cube(194, 28)
+                .addBox(-1.85F, -6, -2.5F, 3.7F, 12, 5)
+                .addBox(-1.80F, -2.5F, -6, 3.6F, 5, 12);
         CubeListBuilder hubs = cube(0, 184)
-                .addBox(2, -6, -6, 0, 12, 12)
-                .addBox(-2, -6, -6, 0, 12, 12);
+                .addBox(2.05F, -6, -6, 0, 12, 12)
+                .addBox(-2.05F, -6, -6, 0, 12, 12);
         float[][] wheelPos = {{14, -14}, {-14, -14}, {14, 14}, {-14, 14}};
         for (int i = 0; i < WHEELS.length; i++) {
-            PartDefinition wheel = root.addOrReplaceChild(WHEELS[i], tread, at(wheelPos[i][0], 18, wheelPos[i][1]));
-            wheel.addOrReplaceChild("tread_45", tread, PartPose.rotation((float) Math.PI / 4, 0, 0));
+            PartDefinition wheel = root.addOrReplaceChild(WHEELS[i], tread0, at(wheelPos[i][0], 18, wheelPos[i][1]));
+            wheel.addOrReplaceChild("tread_45", tread45, PartPose.rotation((float) Math.PI / 4, 0, 0));
             wheel.addOrReplaceChild("hubs", hubs, PartPose.ZERO);
         }
         return LayerDefinition.create(mesh, 256, 256);

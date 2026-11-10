@@ -1,6 +1,5 @@
 package io.github.alexf6.garage.client;
 
-import io.github.alexf6.garage.CarConfig;
 import io.github.alexf6.garage.CarEntity;
 import io.github.alexf6.garage.GarageMod;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -47,7 +46,7 @@ public class CarRenderer extends EntityRenderer<CarEntity, CarRenderer.CarRender
         state.bodyPitch = car.getSuspension().pitch(partialTick);
         state.bodyRoll = car.getSuspension().roll(partialTick);
         state.bodyHeave = car.getSuspension().heave(partialTick);
-        state.speedRatio = (float) Math.min(Math.abs(car.getForwardSpeed()) / CarConfig.get().tuning().maxSpeed(), 1.0);
+        state.speedRatio = (float) Math.min(Math.abs(car.getForwardSpeed()) / car.tuning().maxSpeed(), 1.0);
     }
 
     @Override
