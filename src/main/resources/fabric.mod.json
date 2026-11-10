@@ -1,0 +1,32 @@
+{
+	"schemaVersion": 1,
+	"id": "garage",
+	"version": "${version}",
+	"name": "Garage",
+	"description": "Vehículos para Minecraft. Incluye un Jeep Willys \"Yipao\" de 4 asientos con combustible, baúl, colores y bocina.",
+	"authors": [
+		"AlexF6"
+	],
+	"contact": {
+		"homepage": "https://github.com/AlexF6/garage",
+		"sources": "https://github.com/AlexF6/garage",
+		"issues": "https://github.com/AlexF6/garage/issues"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/garage/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"io.github.alexf6.garage.GarageMod"
+		],
+		"client": [
+			"io.github.alexf6.garage.client.GarageClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}
