@@ -1,0 +1,20 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "equipment",
+	"pattern": [
+		" H ",
+		"IFI",
+		"KWK"
+	],
+	"key": {
+		"H": "minecraft:iron_bars",
+		"I": "minecraft:iron_ingot",
+		"F": "minecraft:furnace",
+		"K": "minecraft:black_wool",
+		"W": "minecraft:leather"
+	},
+	"result": {
+		"id": "garage:motorcycle",
+		"count": 1
+	}
+}

@@ -1,0 +1,21 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "equipment",
+	"pattern": [
+		"LGL",
+		"IFI",
+		"KCK"
+	],
+	"key": {
+		"L": "minecraft:leather",
+		"G": "minecraft:glass_pane",
+		"I": "minecraft:iron_ingot",
+		"F": "minecraft:furnace",
+		"K": "minecraft:black_wool",
+		"C": "minecraft:chest"
+	},
+	"result": {
+		"id": "garage:motocarro",
+		"count": 1
+	}
+}

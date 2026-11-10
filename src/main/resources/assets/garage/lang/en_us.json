@@ -1,6 +1,10 @@
 {
 	"item.garage.car": "Car",
 	"entity.garage.car": "Car",
+	"item.garage.motorcycle": "Motorcycle",
+	"entity.garage.motorcycle": "Motorcycle",
+	"item.garage.motocarro": "Auto Rickshaw",
+	"entity.garage.motocarro": "Auto Rickshaw",
 	"key.garage.horn": "Horn",
 	"key.category.garage.main": "Garage",
 	"message.garage.fuel": "Fuel: %s%%"
