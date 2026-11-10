@@ -1,0 +1,7 @@
+{
+	"parent": "minecraft:item/generated",
+	"textures": {
+		"layer0": "garage:item/motocarro",
+		"layer1": "garage:item/motocarro_trim"
+	}
+}

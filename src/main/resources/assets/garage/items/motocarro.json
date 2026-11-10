@@ -1,0 +1,16 @@
+{
+	"model": {
+		"type": "minecraft:model",
+		"model": "garage:item/motocarro",
+		"tints": [
+			{
+				"type": "minecraft:dye",
+				"default": -1512209
+			},
+			{
+				"type": "minecraft:constant",
+				"value": -1
+			}
+		]
+	}
+}
