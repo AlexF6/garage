@@ -1,0 +1,50 @@
+# gradle
+.gradle/
+build/
+out/
+classes/
+.kotlin/
+local.properties
+
+# Mixin
+.mixin.out/
+
+# fabric (instancia de desarrollo: mundos, config y opciones locales)
+run/
+
+# logs y volcados de fallos (los genera el juego al ejecutar)
+logs/
+*.log
+*.log.gz
+crash-reports/
+hs_err_pid*
+replay_pid*
+
+# secretos y configuración local (tokens de Modrinth/CurseForge, etc.)
+.env
+.env.*
+*.keystore
+*.jks
+
+# idea
+.idea/
+*.ipr
+*.iws
+*.iml
+
+# eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# vscode / otros editores
+.vscode/
+.fleet/
+*.swp
+*~
+
+# sistema operativo
+*.DS_Store
+Thumbs.db
+desktop.ini

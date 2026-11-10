@@ -1,0 +1,11 @@
+# Normaliza los finales de línea para que el build sea igual en Linux, macOS y Windows.
+* text=auto eol=lf
+
+# El wrapper de Gradle necesita estos finales de línea para ejecutarse.
+gradlew text eol=lf
+*.bat text eol=crlf
+
+# Binarios: git no debe tocarlos.
+*.png binary
+*.jar binary
+*.gz binary
