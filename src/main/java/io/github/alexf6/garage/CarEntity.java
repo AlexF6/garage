@@ -18,6 +18,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -40,6 +41,7 @@ import net.minecraft.world.entity.vehicle.VehicleEntity;
 import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -53,14 +55,17 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Carro de 4 asientos. Sigue el patrón del bote vanilla: el cliente del conductor calcula la física
- * y el servidor recibe la posición; el combustible y el color viven en el servidor y se sincronizan.
+ * Vehículo motorizado base y Jeep Willys de 4 asientos. Sigue el patrón del bote vanilla: el cliente del
+ * conductor calcula la física y el servidor recibe la posición; el combustible y el color viven en el
+ * servidor y se sincronizan. Las variantes ({@link MotorcycleEntity}, {@link MotocarroEntity}) heredan el
+ * contrato completo (colisión, inventario, combustible, atropellos, red y desmonte) y solo parametrizan
+ * su tuning, asientos, baúl, color y bocina.
  */
 public class CarEntity extends VehicleEntity implements ContainerEntity, HasCustomInventoryScreen {
 
     public static final int SEATS = 4;
     public static final int DEFAULT_COLOR = 0xC82127; // rojo Willys
-    private static final int CONTAINER_SIZE = 27;
+    private static final int CONTAINER_ROWS = 3;
 
     private static final float WHEEL_RADIUS = 0.375F;
     private static final float TWO_PI = (float) (Math.PI * 2.0);
@@ -71,7 +76,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
     private static final EntityDataAccessor<Integer> DATA_COLOR =
             SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.INT);
 
-    private NonNullList<ItemStack> itemStacks = NonNullList.withSize(CONTAINER_SIZE, ItemStack.EMPTY);
+    private NonNullList<ItemStack> itemStacks = NonNullList.withSize(containerRows() * 9, ItemStack.EMPTY);
     private ResourceKey<LootTable> lootTable;
     private long lootTableSeed;
 
@@ -95,13 +100,52 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
         super(type, level);
     }
 
+    // --- Parámetros de cada variante -----------------------------------------------------
+
+    public CarTuning tuning() {
+        return CarConfig.get().tuning();
+    }
+
+    protected int seats() {
+        return SEATS;
+    }
+
+    public int defaultColor() {
+        return DEFAULT_COLOR;
+    }
+
+    protected int containerRows() {
+        return CONTAINER_ROWS;
+    }
+
+    protected float wheelRadius() {
+        return WHEEL_RADIUS;
+    }
+
+    protected float headTurnLimit() {
+        return 105.0F;
+    }
+
+    /** Grados por tick que el vehículo puede rotar en el aire o casi detenido al pulsar A/D (p. ej. en la moto). */
+    protected float directTurnRate() {
+        return 1.2F;
+    }
+
+    public float idleEnginePitch() {
+        return 0.5F;
+    }
+
+    public float topEnginePitch() {
+        return 1.4F;
+    }
+
     // --- Datos sincronizados -------------------------------------------------------------
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(DATA_FUEL, 0);
-        builder.define(DATA_COLOR, DEFAULT_COLOR);
+        builder.define(DATA_COLOR, defaultColor());
     }
 
     public int getFuel() {
@@ -131,7 +175,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
     protected void readAdditionalSaveData(ValueInput input) {
         readChestVehicleSaveData(input);
         setFuel(input.getIntOr("Fuel", 0));
-        setColor(input.getIntOr("Color", DEFAULT_COLOR));
+        setColor(input.getIntOr("Color", defaultColor()));
     }
 
     // --- Entrada del conductor (la fija el cliente, ver GarageClient) ------------------------
@@ -165,7 +209,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
     }
 
     private void drive() {
-        CarTuning tuning = CarConfig.get().tuning();
+        CarTuning tuning = tuning();
         Vec3 motion = getDeltaMovement();
         boolean onGround = onGround();
         boolean inWater = isInWater();
@@ -174,9 +218,13 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
         // lo que el carro no alcanzó a girar queda como velocidad lateral (derrape) y las llantas la absorben
         double speed = forwardOf(motion.x, motion.z, getYRot());
         steerAngle = CarPhysics.nextSteer(steerAngle, input, speed, tuning);
-        if (onGround) {
-            setYRot(getYRot() + CarPhysics.yawDelta(speed, steerAngle, input.brake(), tuning));
+        float yawStep = CarPhysics.yawDelta(speed, steerAngle, onGround && input.brake(), tuning);
+        if (!onGround) {
+            yawStep = yawStep * 0.75F + input.steering() * directTurnRate();
+        } else if (Math.abs(speed) < 0.08 && input.steering() != 0) {
+            yawStep += input.steering() * directTurnRate();
         }
+        setYRot(getYRot() + yawStep);
 
         double yawRad = Math.toRadians(getYRot());
         double sin = Math.sin(yawRad);
@@ -191,7 +239,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
         move(MoverType.SELF, getDeltaMovement());
     }
 
-    /** Componente de un desplazamiento horizontal en la dirección a la que mira el carro. */
+    /** Componente de un desplazamiento horizontal en la dirección a la que mira el vehículo. */
     private static double forwardOf(double dx, double dz, float yawDeg) {
         double yawRad = Math.toRadians(yawDeg);
         return -dx * Math.sin(yawRad) + dz * Math.cos(yawRad);
@@ -202,8 +250,8 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
      * interpolación): rodado = distancia / radio; dirección = inversa del modelo de giro; suspensión según
      * las aceleraciones observadas.
      */
-    private void tickVisuals() {
-        CarTuning tuning = CarConfig.get().tuning();
+    protected void tickVisuals() {
+        CarTuning tuning = tuning();
         double forward = forwardOf(getX() - this.xo, getZ() - this.zo, getYRot());
         double longAccel = forward - this.forwardSpeed;
         this.forwardSpeed = forward;
@@ -213,7 +261,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
         }
 
         this.wheelRollO = this.wheelRoll;
-        this.wheelRoll += (float) (forward / WHEEL_RADIUS);
+        this.wheelRoll += (float) (forward / wheelRadius());
         if (Math.abs(this.wheelRoll) > TWO_PI) {
             // Resta vueltas completas a ambos valores: la interpolación sigue continua y el float no pierde precisión
             float turns = TWO_PI * (int) (this.wheelRoll / TWO_PI);
@@ -253,8 +301,8 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
     }
 
     /**
-     * Aparta (y desde cierta velocidad lastima) a las criaturas que el carro tiene delante. Va en el servidor
-     * porque el daño lo decide él; sin esto el carro choca contra ellas como contra una pared.
+     * Aparta (y desde cierta velocidad lastima) a las criaturas que el vehículo tiene delante. Va en el servidor
+     * porque el daño lo decide él; sin esto el vehículo choca contra ellas como contra una pared.
      */
     private void runOver(ServerLevel level, LivingEntity driver) {
         Vec3 pos = position();
@@ -267,7 +315,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
 
         double dirX = motion.x / speed;
         double dirZ = motion.z / speed;
-        double strength = config.knockback() * Math.min(speed / CarConfig.get().tuning().maxSpeed(), 1.0);
+        double strength = config.knockback() * Math.min(speed / tuning().maxSpeed(), 1.0);
         float damage = (float) ((speed - config.damageSpeed()) * config.damagePerSpeed());
         AABB zone = getBoundingBox().expandTowards(motion.x, 0.0, motion.z).inflate(0.1, 0.0, 0.1);
         DamageSource source = damageSources().source(DamageTypes.MOB_ATTACK, this, driver);
@@ -287,7 +335,11 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
     }
 
     private static boolean canBeRunOver(Entity entity) {
-        return entity instanceof LivingEntity && entity.isAlive() && !entity.isSpectator() && entity.getVehicle() == null;
+        if (!(entity instanceof LivingEntity living) || !living.isAlive() || living.isSpectator()
+                || living.isInvulnerable() || living.getVehicle() != null) {
+            return false;
+        }
+        return !(living instanceof Player player && player.isCreative());
     }
 
     /** Gasta combustible mientras el conductor acelera o retrocede y le muestra el nivel. */
@@ -315,7 +367,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
         return 0.08;
     }
 
-    /** El carro amortigua las caídas: vanilla pasaría el golpe a los pasajeros (propagateFallToPassengers). */
+    /** El vehículo amortigua las caídas: vanilla pasaría el golpe a los pasajeros (propagateFallToPassengers). */
     @Override
     public boolean causeFallDamage(double fallDistance, float multiplier, DamageSource source) {
         return false;
@@ -354,6 +406,23 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
     }
 
     @Override
+    public void push(Entity other) {
+        if (!level().isClientSide()
+                && !other.isPassenger()
+                && getControllingPassenger() != null
+                && canAddPassenger(other)
+                && Math.abs(forwardSpeed) < CarConfig.get().runOver().pushSpeed()
+                && other instanceof LivingEntity
+                && !(other instanceof Player)
+                && !other.isInWater()
+                && other.getBbWidth() < getBbWidth()) {
+            other.startRiding(this);
+            return;
+        }
+        super.push(other);
+    }
+
+    @Override
     public boolean isPickable() {
         return !isRemoved();
     }
@@ -372,7 +441,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
 
     @Override
     public ItemStack getPickResult() {
-        return ModItems.carStack(getColor());
+        return ModItems.vehicleStack(getDropItem(), getColor(), defaultColor());
     }
 
     /** Igual que VehicleEntity.destroy, pero el item soltado conserva el color. */
@@ -380,7 +449,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
     public void destroy(ServerLevel level, Item item) {
         kill(level);
         if (level.getGameRules().get(GameRules.ENTITY_DROPS)) {
-            ItemStack stack = ModItems.carStack(getColor());
+            ItemStack stack = ModItems.vehicleStack(item, getColor(), defaultColor());
             stack.set(DataComponents.CUSTOM_NAME, getCustomName());
             spawnAtLocation(level, stack);
         }
@@ -395,7 +464,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
     @Override
     public void remove(Entity.RemovalReason reason) {
         if (!level().isClientSide() && reason.shouldDestroy()) {
-            net.minecraft.world.Containers.dropContents(level(), this, this);
+            Containers.dropContents(level(), this, this);
         }
         super.remove(reason);
     }
@@ -445,7 +514,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
 
     @Override
     protected boolean canAddPassenger(Entity passenger) {
-        return getPassengers().size() < SEATS;
+        return getPassengers().size() < seats();
     }
 
     @Override
@@ -457,7 +526,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
     protected void positionRider(Entity passenger, Entity.MoveFunction move) {
         super.positionRider(passenger, move);
         if (passenger instanceof LivingEntity) {
-            // El pasajero gira junto con el carro, pero puede mirar alrededor
+            // El pasajero gira junto con el vehículo, pero puede mirar alrededor
             passenger.setYRot(passenger.getYRot() + deltaRotation);
             passenger.setYHeadRot(passenger.getYHeadRot() + deltaRotation);
             clampRotation(passenger);
@@ -471,8 +540,9 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
 
     private void clampRotation(Entity passenger) {
         passenger.setYBodyRot(getYRot());
+        float limit = headTurnLimit();
         float diff = Mth.wrapDegrees(passenger.getYRot() - getYRot());
-        float clamped = Mth.clamp(diff, -105.0F, 105.0F);
+        float clamped = Mth.clamp(diff, -limit, limit);
         passenger.yRotO += clamped - diff;
         passenger.setYRot(passenger.getYRot() + clamped - diff);
         passenger.setYHeadRot(passenger.getYRot());
@@ -491,7 +561,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
         Vec3 rel = passenger.position().subtract(center);
         Vec3 seat = center.add(forward.scale(rel.dot(forward)));
         double side = rel.dot(left) < 0 ? -1.0 : 1.0;
-        // La caja de colisión no gira con el carro: hay que salir de ella entera, más medio jugador
+        // La caja de colisión no gira con el vehículo: hay que salir de ella entera, más medio jugador
         double reach = getBbWidth() / 2.0 + passenger.getBbWidth() / 2.0 + 0.05;
 
         for (double s : new double[] {side, -side}) {
@@ -509,7 +579,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
         return from.add(dir.scale(t));
     }
 
-    /** Suelo válido y espacio libre en (x, z): al nivel del carro, un bloque arriba o uno abajo. */
+    /** Suelo válido y espacio libre en (x, z): al nivel del vehículo, un bloque arriba o uno abajo. */
     private Vec3 findDismountSpot(LivingEntity passenger, Vec3 at) {
         BlockPos base = BlockPos.containing(at.x, getY(), at.z);
         for (BlockPos pos : new BlockPos[] {base, base.above(), base.below()}) {
@@ -530,7 +600,15 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
 
     public void honk(ServerPlayer player) {
         if (hornCooldown > 0 || getControllingPassenger() != player) return;
-        hornCooldown = 20;
+        hornCooldown = hornCooldownTicks();
+        playHornSound();
+    }
+
+    protected int hornCooldownTicks() {
+        return 20;
+    }
+
+    protected void playHornSound() {
         level().playSound(null, getX(), getY(), getZ(),
                 SoundEvents.NOTE_BLOCK_PLING.value(), SoundSource.NEUTRAL, 1.4F, 0.6F);
         level().playSound(null, getX(), getY(), getZ(),
@@ -551,7 +629,13 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
         if (player.isSpectator()) return null;
         unpackChestVehicleLootTable(inventory.player);
-        return ChestMenu.threeRows(containerId, inventory, this);
+        int rows = containerRows();
+        MenuType<ChestMenu> menuType = switch (rows) {
+            case 1 -> MenuType.GENERIC_9x1;
+            case 2 -> MenuType.GENERIC_9x2;
+            default -> MenuType.GENERIC_9x3;
+        };
+        return new ChestMenu(menuType, containerId, inventory, this, rows);
     }
 
     @Override
@@ -561,7 +645,7 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
 
     @Override
     public int getContainerSize() {
-        return CONTAINER_SIZE;
+        return containerRows() * 9;
     }
 
     @Override
@@ -624,6 +708,6 @@ public class CarEntity extends VehicleEntity implements ContainerEntity, HasCust
 
     @Override
     public void clearItemStacks() {
-        this.itemStacks = NonNullList.withSize(CONTAINER_SIZE, ItemStack.EMPTY);
+        this.itemStacks = NonNullList.withSize(getContainerSize(), ItemStack.EMPTY);
     }
 }
