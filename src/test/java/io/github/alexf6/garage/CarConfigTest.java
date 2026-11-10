@@ -59,4 +59,16 @@ class CarConfigTest {
         assertEquals(CarConfig.DEFAULT, CarConfig.get());
         assertEquals("{ esto no es json", Files.readString(file));
     }
+
+    @Test
+    void runOverConValoresFueraDeRangoSeCorrige() throws Exception {
+        Path file = dir.resolve("garage.json");
+        Files.writeString(file, "{\"runOver\": {\"pushSpeed\": -1.0, \"damageSpeed\": -2.0, \"damagePerSpeed\": -5.0, \"knockback\": 99.0}}");
+        CarConfig.load(file);
+        CarConfig.RunOver r = CarConfig.get().runOver();
+        assertEquals(0.0, r.pushSpeed());
+        assertEquals(0.0, r.damageSpeed());
+        assertEquals(0.0, r.damagePerSpeed());
+        assertEquals(10.0, r.knockback());
+    }
 }

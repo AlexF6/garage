@@ -64,13 +64,19 @@ public record CarConfig(int maxFuel, int fuelPerItem, float engineVolume, CarTun
 
     private static CarConfig validate(CarConfig config) {
         CarTuning tuning = config.tuning();
-        String invalid = tuning.firstInvalid();
+        String invalid = tuning == null ? "null" : tuning.firstInvalid();
         if (invalid != null) {
             GarageMod.LOGGER.warn("garage.json: valor inválido en tuning ({}); se usa el manejo por defecto", invalid);
             tuning = DEFAULT.tuning();
         }
+        RunOver r = config.runOver() != null ? config.runOver() : DEFAULT.runOver();
+        double pushSpeed = Math.clamp(r.pushSpeed(), 0.0, 10.0);
+        double damageSpeed = Math.clamp(r.damageSpeed(), pushSpeed, 10.0);
+        double damagePerSpeed = Math.clamp(r.damagePerSpeed(), 0.0, 1000.0);
+        double knockback = Math.clamp(r.knockback(), 0.0, 10.0);
+        RunOver runOver = new RunOver(r.enabled(), pushSpeed, damageSpeed, damagePerSpeed, knockback, r.hurtPlayers());
         return new CarConfig(Math.max(1, config.maxFuel()), Math.max(0, config.fuelPerItem()),
-                Math.clamp(config.engineVolume(), 0.0F, 1.0F), tuning, config.runOver());
+                Math.clamp(config.engineVolume(), 0.0F, 1.0F), tuning, runOver);
     }
 
     /** Copia las claves del usuario sobre los valores por defecto, entrando en los objetos anidados. */
