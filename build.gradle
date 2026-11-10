@@ -1,0 +1,115 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+	id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+repositories {
+	// Agrega repositorios adicionales aquí si los necesitas en el futuro.
+}
+
+dependencies {
+	// Minecraft 26.x viene sin ofuscar (usa nombres de Mojang directamente)
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+
+	// En Loom 1.15+ (Minecraft 26.1+) se usa implementation en vez de modImplementation
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	// Pruebas de la física pura (paquete physics), sin arrancar Minecraft
+	testImplementation platform("org.junit:junit-bom:5.14.4")
+	testImplementation "org.junit.jupiter:junit-jupiter"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.named("test") {
+	useJUnitPlatform()
+}
+
+processResources {
+	inputs.property "version", project.version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": inputs.properties.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+}
+
+java {
+	// Loom adjunta fuentes automáticamente
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
+}
+
+jar {
+	inputs.property "archivesName", project.base.archivesName
+
+	from("LICENSE") {
+		rename { "${it}_${inputs.properties.archivesName}" }
+	}
+}
+
+// Jars deterministas: el mismo commit produce el mismo jar (mismo orden y sin fechas) en cualquier PC.
+tasks.withType(AbstractArchiveTask).configureEach {
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
+}
+
+// Copia opcional del jar a una carpeta de mods. No se hace nada por defecto: el build solo escribe dentro de
+// este proyecto. Para activarlo, define la ruta en tu ~/.gradle/gradle.properties (no en el repo) o con -PmodsDir=...
+//   modsDir=/ruta/a/minecraft/mods     <- además de copiar, borra los jars anteriores de este mod en esa carpeta
+//   exportDir=/ruta/donde/dejar/copia  <- copia adicional del jar
+def modsDir = providers.gradleProperty("modsDir").orNull
+def exportDir = providers.gradleProperty("exportDir").orNull
+
+if (modsDir) {
+	tasks.register("installMod", Copy) {
+		group = "build"
+		description = "Copia el jar del mod a modsDir y quita sus versiones anteriores."
+		dependsOn tasks.named("jar")
+
+		doFirst {
+			fileTree(modsDir) { include "${project.archives_base_name}-*.jar" }.each { it.delete() }
+		}
+		from tasks.named("jar").flatMap { it.archiveFile }
+		into modsDir
+	}
+	tasks.named("assemble") { finalizedBy tasks.named("installMod") }
+}
+
+if (exportDir) {
+	tasks.register("exportMod", Copy) {
+		group = "build"
+		description = "Copia el jar del mod a exportDir."
+		dependsOn tasks.named("jar")
+		from tasks.named("jar").flatMap { it.archiveFile }
+		into exportDir
+	}
+	tasks.named("assemble") { finalizedBy tasks.named("exportMod") }
+}
+
+publishing {
+	publications {
+		create("mavenJava", MavenPublication) {
+			artifactId = project.archives_base_name
+			from components.java
+		}
+	}
+	repositories {
+	}
+}
