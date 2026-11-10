@@ -1,0 +1,7 @@
+{
+	"item.garage.car": "Car",
+	"entity.garage.car": "Car",
+	"key.garage.horn": "Horn",
+	"key.category.garage.main": "Garage",
+	"message.garage.fuel": "Fuel: %s%%"
+}
