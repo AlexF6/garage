@@ -85,9 +85,18 @@ class CarPhysicsTest {
     }
 
     @Test
-    void volanteSuave() {
+    void volanteSuaveYVuelveRapidoAlCentro() {
         double steer = CarPhysics.nextSteer(0, new CarInput(0, 1, false), 0, T);
         assertEquals(T.steerRate(), steer, 1e-9);
+        double centered = CarPhysics.nextSteer(T.maxSteerLow(), CarInput.NONE, 0, T);
+        assertTrue(T.maxSteerLow() - centered > T.steerRate(), "al soltar A/D el volante vuelve más rápido al centro");
+    }
+
+    @Test
+    void enElAireAbsorbeVelocidadLateralParaPoderRedirigirRumbo() {
+        double airLat = CarPhysics.nextLateral(0.4, CarInput.NONE, false, false, CarTuning.ENDURO);
+        assertTrue(airLat < 0.4 * CarTuning.ENDURO.airDrag(), "en el aire absorbe parte del derrape para girar");
+        assertTrue(airLat > CarPhysics.nextLateral(0.4, CarInput.NONE, true, false, CarTuning.ENDURO));
     }
 
     @Test
@@ -117,6 +126,12 @@ class CarPhysicsTest {
     @Test
     void validacionDeParametros() {
         assertNull(T.firstInvalid());
+        assertNull(CarTuning.ENDURO.firstInvalid());
+        assertNull(CarTuning.MOTOCARRO.firstInvalid());
+        assertTrue(CarTuning.ENDURO.maxSpeed() > T.maxSpeed());
+        assertTrue(CarTuning.ENDURO.accel() > T.accel());
+        assertTrue(CarTuning.MOTOCARRO.maxSpeed() > T.maxSpeed());
+        assertTrue(CarTuning.MOTOCARRO.maxSpeed() < CarTuning.ENDURO.maxSpeed());
         CarTuning broken = new CarTuning(0, 0.2, 0.03, 0.02, 0.04, 0.035, 0.98, 0.995, 0.85, 1.75, 0.6, 0.2, 0.1,
                 0.3, 0.92, 1.6);
         assertNotNull(broken.firstInvalid());

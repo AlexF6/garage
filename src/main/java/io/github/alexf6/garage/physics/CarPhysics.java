@@ -33,24 +33,26 @@ public final class CarPhysics {
     }
 
     /**
-     * Ángulo de dirección: se acerca al objetivo a {@code steerRate} por tick (volante suave) y el máximo
-     * baja con la velocidad, para maniobrar cerrado al parquear sin volverse inestable en recta.
+     * Ángulo de dirección: se acerca al objetivo a {@code steerRate} por tick (y vuelve al centro más rápido
+     * al soltar las teclas) y el máximo baja con la velocidad, para maniobrar cerrado sin perder estabilidad.
      */
     public static double nextSteer(double steer, CarInput input, double speed, CarTuning t) {
         double ratio = Math.min(Math.abs(speed) / t.maxSpeed(), 1.0);
         double maxSteer = t.maxSteerLow() + (t.maxSteerHigh() - t.maxSteerLow()) * ratio;
         double target = input.steering() * maxSteer;
-        return steer + clamp(target - steer, -t.steerRate(), t.steerRate());
+        double rate = input.steering() == 0 ? t.steerRate() * 1.8 : t.steerRate();
+        return steer + clamp(target - steer, -rate, rate);
     }
 
     /**
-     * Velocidad lateral (derrape) que queda tras un tick. Las llantas la absorben según el agarre; con el
-     * freno de mano casi no la absorben y el carro sigue deslizándose hacia donde iba.
+     * Velocidad lateral (derrape) que queda tras un tick. Las llantas la absorben según el agarre; en el aire
+     * conserva una fracción intermedia entre {@code grip} y {@code airDrag} para poder redirigir el rumbo en saltos
+     * y bajadas de bloques.
      */
     public static double nextLateral(double lateral, CarInput input, boolean onGround, boolean inWater, CarTuning t) {
         double v;
         if (inWater) v = lateral * t.waterDrag();
-        else if (!onGround) v = lateral * t.airDrag();
+        else if (!onGround) v = lateral * ((t.grip() + t.airDrag()) * 0.5);
         else v = lateral * (input.brake() ? t.driftGrip() : t.grip());
         return Math.abs(v) < STOP_EPSILON ? 0.0 : v;
     }

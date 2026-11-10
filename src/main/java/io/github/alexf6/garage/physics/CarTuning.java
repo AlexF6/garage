@@ -39,6 +39,30 @@ public record CarTuning(
             0.3, 0.92, 1.6
     );
 
+    /** Moto enduro/dual-sport (Yamaha XTZ 125): ligera (~118 kg), ~68 km/h (0.92 b/t), alto torque y giro cerrado. */
+    public static final CarTuning ENDURO = new CarTuning(
+            0.92, 0.18,
+            0.050, 0.02,
+            0.055, 0.05,
+            0.985, 0.992, 0.70,
+            1.25,
+            0.78, 0.36,
+            0.24,
+            0.16, 0.88, 1.8
+    );
+
+    /** Motocarro urbano (Bajaj RE / "Torito"): ligero-medio, ~52 km/h (0.72 b/t), radio cerrado. */
+    public static final CarTuning MOTOCARRO = new CarTuning(
+            0.72, 0.18,
+            0.038, 0.018,
+            0.045, 0.040,
+            0.982, 0.993, 0.75,
+            1.50,
+            0.72, 0.28,
+            0.18,
+            0.22, 0.90, 1.7
+    );
+
     /** Primer parámetro fuera de rango, o {@code null} si todos son válidos. */
     public String firstInvalid() {
         if (!(maxSpeed > 0) || !(maxReverse > 0)) return "maxSpeed/maxReverse";
