@@ -134,18 +134,18 @@ public final class MotorcycleModels {
         // Sillín corrido ergonómico negro de dos niveles (conductor + pasajero)
         bodywork.addOrReplaceChild("seat", CubeListBuilder.create()
                 .texOffs(0, 102).addBox(-2.1F, -16.8F, -1.5F, 4.2F, 2.2F, 5.5F)   // Sección delantera conductor
-                .texOffs(22, 102).addBox(-2.2F, -17.6F, 4.0F, 4.4F, 2.6F, 6.0F),  // Sección trasera pasajero
+                .texOffs(22, 102).addBox(-2.2F, -17.6F, 4.0F, 4.4F, 2.6F, 5.5F),  // Sección trasera pasajero (termina exacto en Z=9.5 donde inicia parrilla)
                 PartPose.rotation(0.05F, 0.0F, 0.0F));
 
         // Parrilla portaequipaje trasera metálica negra, faro trasero rojo, direccionales y guardafango
         bodywork.addOrReplaceChild("rear_rack", CubeListBuilder.create()
-                .texOffs(46, 102).addBox(-2.6F, -19.3F, 9.5F, 5.2F, 1.0F, 6.0F)   // Parrilla superior y asas
-                .texOffs(70, 102).addBox(-1.5F, -17.8F, 15.2F, 3.0F, 1.8F, 1.0F)  // Luz de freno roja (stop)
+                .texOffs(46, 102).addBox(-2.6F, -19.45F, 9.5F, 5.2F, 0.95F, 6.0F) // Parrilla superior asentada sobre el colín (-18.5F)
+                .texOffs(70, 102).addBox(-1.5F, -17.8F, 15.51F, 3.0F, 1.8F, 1.0F) // Luz de freno roja (stop) sobre cara posterior
                 .texOffs(80, 102).addBox(2.2F, -17.4F, 14.2F, 1.4F, 1.0F, 1.0F)   // Direccional trasera izq
                 .texOffs(80, 102).addBox(-3.6F, -17.4F, 14.2F, 1.4F, 1.0F, 1.0F), // Direccional trasera der
                 PartPose.ZERO);
         bodywork.addOrReplaceChild("mudflap", cube(88, 102)
-                .addBox(-1.5F, -16.2F, 14.5F, 3.0F, 4.0F, 0.8F),
+                .addBox(-1.5F, -16.5F, 14.8F, 3.0F, 4.0F, 0.8F),
                 PartPose.rotation(0.28F, 0.0F, 0.0F));
 
         // 3. Basculante trasero de aluminio (swingarm) y Rueda Trasera de radios (12x12, idéntica a la delantera)
@@ -176,11 +176,11 @@ public final class MotorcycleModels {
         // Horquillas telescópicas: tijas, barras superiores cromadas, fuelles negros de goma y botellas plateadas
         steering.addOrReplaceChild("forks", CubeListBuilder.create()
                 .texOffs(0, 132).addBox(-2.6F, -1.0F, -0.8F, 5.2F, 1.2F, 1.8F)    // Tija superior
-                .texOffs(16, 132).addBox(-2.6F, 2.0F, -0.9F, 5.2F, 1.2F, 2.0F)    // Tija inferior
-                .texOffs(32, 132).addBox(1.35F, -1.5F, -0.5F, 1.1F, 4.0F, 1.1F)   // Barra cromada sup izq
-                .texOffs(32, 132).addBox(-2.45F, -1.5F, -0.5F, 1.1F, 4.0F, 1.1F)  // Barra cromada sup der
-                .texOffs(40, 132).addBox(1.20F, 2.5F, -0.7F, 1.4F, 4.8F, 1.5F)    // Fuelle de goma negro izq
-                .texOffs(48, 132).addBox(-2.60F, 2.5F, -0.7F, 1.4F, 4.8F, 1.5F)   // Fuelle de goma negro der
+                .texOffs(16, 132).addBox(-2.65F, 1.95F, -0.95F, 5.3F, 1.25F, 2.1F) // Tija inferior (anchura 5.3F abraza los fuelles sin z-fighting)
+                .texOffs(32, 132).addBox(1.35F, -1.5F, -0.5F, 1.1F, 4.7F, 1.1F)   // Barra cromada sup izq (hasta base tija)
+                .texOffs(32, 132).addBox(-2.45F, -1.5F, -0.5F, 1.1F, 4.7F, 1.1F)  // Barra cromada sup der (hasta base tija)
+                .texOffs(40, 132).addBox(1.20F, 3.2F, -0.7F, 1.4F, 4.1F, 1.5F)    // Fuelle de goma negro izq (inicia bajo la tija inferior)
+                .texOffs(48, 132).addBox(-2.60F, 3.2F, -0.7F, 1.4F, 4.1F, 1.5F)   // Fuelle de goma negro der (inicia bajo la tija inferior)
                 .texOffs(56, 132).addBox(1.25F, 7.3F, -0.6F, 1.3F, 5.8F, 1.4F)    // Botella inferior aluminio izq
                 .texOffs(64, 132).addBox(-2.55F, 7.3F, -0.6F, 1.3F, 5.8F, 1.4F),  // Botella inferior aluminio der
                 PartPose.ZERO);
