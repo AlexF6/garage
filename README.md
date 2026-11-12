@@ -121,6 +121,7 @@ movimiento observado, así que se ven igual para todos sin paquetes extra.
 | `physics/VehiclePhysics` | Funciones puras del manejo: velocidad, volante, giro tipo bicicleta y derrape |
 | `physics/VehicleMath` | Funciones puras de la entidad: rumbo, giro directo, salida, empuje, rodado, dirección visual y combustible |
 | `physics/VehicleTuning`, `VehicleInput` | Parámetros de un vehículo (`WILLYS`, `ENDURO`, `MOTOCARRO`, `MOTOCARGUERO`) con sus límites, y entrada inmutable del conductor |
+| `physics/VehicleAnimation` | Estado de animación visual (rodado, dirección, inclinación y suspensión), solo en el cliente |
 | `physics/Suspension` | Resortes del cabeceo, el balanceo y el rebote (solo visual) |
 | `config/GarageConfig`, `ClientConfig` | Leen, completan, validan y respaldan `config/garage.json` (servidor) y `config/garage-client.json` (cliente); `ConfigFiles` aporta la copia `.bak` y la escritura atómica |
 | `network/HornPayload`, `TuningSyncPayload` | Paquetes: bocina (cliente → servidor) y manejo de cada vehículo (servidor → cliente, al conectar) |

@@ -7,7 +7,7 @@ import io.github.alexf6.garage.physics.VehicleInput;
 import io.github.alexf6.garage.physics.VehiclePhysics;
 import io.github.alexf6.garage.physics.VehicleTuning;
 import io.github.alexf6.garage.physics.VehicleMath;
-import io.github.alexf6.garage.physics.Suspension;
+import io.github.alexf6.garage.physics.VehicleAnimation;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -49,7 +49,6 @@ import net.minecraft.world.phys.Vec3;
 public class MotorVehicleEntity extends ChestVehicleEntity {
 
     private static final int FUEL_HUD_INTERVAL = 40; // la action bar dura ~3 s; se reenvía antes o si cambia
-    private static final float LEAN_SMOOTHING = 0.3F;
     private static final double DEFAULT_GRAVITY = 0.08; // bloques/tick²
     private static final float STEP_HEIGHT = 1.0F; // sube bloques completos sin saltar
     private static final int INTERPOLATION_STEPS = 3;
@@ -70,15 +69,8 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
     private int lastFuelPercent = -1;
     private int hornCooldown;
 
-    // Animación (solo cliente): rodado de las ruedas, giro de las delanteras e inclinación lateral, en radianes
-    private float wheelRoll;
-    private float wheelRollO;
-    private float steer;
-    private float steerO;
-    private float lean;
-    private float leanO;
-    private double forwardSpeed; // observada (bloques/tick); la usan el sonido, la suspensión y el empuje
-    private final Suspension suspension = new Suspension();
+    private final VehicleAnimation animation = new VehicleAnimation();
+    private double forwardSpeed; // observada (bloques/tick); la usan el sonido, la animación y el empuje
 
     public MotorVehicleEntity(EntityType<? extends MotorVehicleEntity> type, Level level, VehicleSpec spec) {
         super(type, level, spec.containerRows());
@@ -220,51 +212,14 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
         double longAccel = forward - this.forwardSpeed;
         this.forwardSpeed = forward;
         if (level().isClientSide()) {
-            animate(forward, longAccel);
+            animation.tick(forward, longAccel, deltaRotation, getY() - this.yo, spec.wheelRadius(),
+                    spec.leanPerSteer(), tuning());
         }
     }
 
-    /**
-     * Animación visual: rodado = distancia / radio; dirección = inversa del modelo de giro; suspensión según
-     * las aceleraciones observadas; inclinación lateral proporcional al giro y a la velocidad.
-     */
-    private void animate(double forward, double longAccel) {
-        VehicleTuning tuning = tuning();
-        suspension.tick(longAccel, forward * Math.toRadians(deltaRotation), getY() - this.yo);
-
-        this.wheelRollO = this.wheelRoll;
-        this.wheelRoll += (float) (forward / spec.wheelRadius());
-        // Resta vueltas completas a ambos valores: la interpolación sigue continua y el float no pierde precisión
-        float turns = VehicleMath.fullTurns(this.wheelRoll);
-        this.wheelRoll -= turns;
-        this.wheelRollO -= turns;
-
-        this.steerO = this.steer;
-        double target = VehiclePhysics.steerFromMotion(deltaRotation, forward, tuning);
-        this.steer = VehicleMath.nextVisualSteer(this.steer, target, tuning.maxSteerLow());
-
-        if (spec.leanPerSteer() > 0.0F) {
-            this.leanO = this.lean;
-            float targetLean = this.steer * (float) speedRatio() * spec.leanPerSteer();
-            this.lean += (targetLean - this.lean) * LEAN_SMOOTHING;
-        }
-    }
-
-    public float getWheelRoll(float partialTick) {
-        return Mth.lerp(partialTick, this.wheelRollO, this.wheelRoll);
-    }
-
-    public float getSteer(float partialTick) {
-        return Mth.lerp(partialTick, this.steerO, this.steer);
-    }
-
-    /** Inclinación lateral (radianes) de las motos; 0 en los vehículos que no se inclinan. */
-    public float getLean(float partialTick) {
-        return Mth.lerp(partialTick, this.leanO, this.lean);
-    }
-
-    public Suspension getSuspension() {
-        return this.suspension;
+    /** Estado de animación visual (ruedas, dirección, inclinación y suspensión); solo avanza en el cliente. */
+    public VehicleAnimation animation() {
+        return this.animation;
     }
 
     public double getForwardSpeed() {

@@ -1,7 +1,7 @@
 package io.github.alexf6.garage.client;
 
 import io.github.alexf6.garage.MotorVehicleEntity;
-import io.github.alexf6.garage.physics.Suspension;
+import io.github.alexf6.garage.physics.VehicleAnimation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.EntityModel;
@@ -57,13 +57,13 @@ public class VehicleRenderer extends EntityRenderer<MotorVehicleEntity, VehicleR
         state.hurtTime = vehicle.getHurtTime() - partialTick;
         state.damage = Math.max(vehicle.getDamage() - partialTick, 0.0F);
         state.tint = 0xFF000000 | vehicle.getColor();
-        state.wheelRoll = vehicle.getWheelRoll(partialTick);
-        state.steer = vehicle.getSteer(partialTick);
-        state.lean = vehicle.getLean(partialTick);
-        Suspension suspension = vehicle.getSuspension();
-        state.bodyPitch = suspension.pitch(partialTick);
-        state.bodyRoll = suspension.roll(partialTick);
-        state.bodyHeave = suspension.heave(partialTick);
+        VehicleAnimation animation = vehicle.animation();
+        state.wheelRoll = animation.wheelRoll(partialTick);
+        state.steer = animation.steer(partialTick);
+        state.lean = animation.lean(partialTick);
+        state.bodyPitch = animation.suspension().pitch(partialTick);
+        state.bodyRoll = animation.suspension().roll(partialTick);
+        state.bodyHeave = animation.suspension().heave(partialTick);
         state.isEngineRunning = vehicle.isEngineRunning();
         state.speedRatio = (float) vehicle.speedRatio();
     }
