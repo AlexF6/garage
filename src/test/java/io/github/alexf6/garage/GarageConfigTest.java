@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.github.alexf6.garage.physics.VehicleTuning;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -157,18 +156,6 @@ class GarageConfigTest {
         List<String> fixes = new ArrayList<>();
         assertEquals(GarageConfig.DEFAULT, GarageConfig.sanitize(GarageConfig.DEFAULT, fixes));
         assertTrue(fixes.isEmpty());
-    }
-
-    @Test
-    void elManejoSincronizadoGanaALaConfigLocalHastaDesconectar() {
-        VehicleTuning remote = VehicleTuning.ENDURO;
-        GarageConfig.setSyncedTuning(remote);
-        try {
-            assertEquals(remote, GarageConfig.carTuning());
-        } finally {
-            GarageConfig.clearSyncedTuning();
-        }
-        assertEquals(GarageConfig.DEFAULT.tuning(), GarageConfig.carTuning());
     }
 
     @Test

@@ -88,7 +88,12 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
         return spec;
     }
 
+    /** Manejo de este vehículo; en el cliente manda el del servidor al que está conectado, si lo envió. */
     public VehicleTuning tuning() {
+        if (level().isClientSide()) {
+            VehicleTuning synced = SyncedTunings.get(spec.id());
+            if (synced != null) return synced;
+        }
         return spec.tuning().get();
     }
 

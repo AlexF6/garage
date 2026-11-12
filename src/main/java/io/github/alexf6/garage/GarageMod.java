@@ -19,10 +19,10 @@ public class GarageMod implements ModInitializer {
 
         PayloadTypeRegistry.serverboundPlay().register(HornPayload.TYPE, HornPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(TuningSyncPayload.TYPE, TuningSyncPayload.CODEC);
-        // El manejo del Jeep lo dicta el servidor: cada cliente lo recibe al entrar
+        // El manejo de los vehículos lo dicta el servidor: cada cliente lo recibe al entrar
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             if (ServerPlayNetworking.canSend(handler.getPlayer(), TuningSyncPayload.TYPE)) {
-                ServerPlayNetworking.send(handler.getPlayer(), new TuningSyncPayload(GarageConfig.get().tuning()));
+                ServerPlayNetworking.send(handler.getPlayer(), TuningSyncPayload.of(VehicleSpecs.ALL));
             }
         });
         ServerPlayNetworking.registerGlobalReceiver(HornPayload.TYPE, (payload, context) -> {

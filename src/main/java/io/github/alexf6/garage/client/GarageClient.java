@@ -3,12 +3,15 @@ package io.github.alexf6.garage.client;
 import io.github.alexf6.garage.MotorVehicleEntity;
 import io.github.alexf6.garage.GarageMod;
 import io.github.alexf6.garage.HornPayload;
-import io.github.alexf6.garage.GarageConfig;
+import io.github.alexf6.garage.SyncedTunings;
 import io.github.alexf6.garage.ModVehicles;
 import io.github.alexf6.garage.TuningSyncPayload;
 import io.github.alexf6.garage.VehicleSpec;
 import io.github.alexf6.garage.VehicleSpecs;
 import io.github.alexf6.garage.physics.VehicleInput;
+import io.github.alexf6.garage.physics.VehicleTuning;
+import java.util.HashMap;
+import java.util.Map;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
@@ -41,16 +44,20 @@ public class GarageClient implements ClientModInitializer {
                     context -> new VehicleRenderer(context, model.look()));
         }
 
-        // El manejo del Jeep lo manda el servidor al entrar y se descarta al salir
+        // El manejo de los vehículos lo manda el servidor al entrar y se descarta al salir
         ClientPlayNetworking.registerGlobalReceiver(TuningSyncPayload.TYPE, (payload, context) -> {
-            String invalid = payload.tuning().firstInvalid();
-            if (invalid == null) {
-                GarageConfig.setSyncedTuning(payload.tuning());
-            } else {
-                GarageMod.LOGGER.warn("El servidor mandó un tuning inválido ({}); se usa el local", invalid);
-            }
+            Map<String, VehicleTuning> valid = new HashMap<>();
+            payload.tunings().forEach((id, tuning) -> {
+                String invalid = tuning.firstInvalid();
+                if (invalid == null) {
+                    valid.put(id, tuning);
+                } else {
+                    GarageMod.LOGGER.warn("El servidor mandó un tuning inválido para {} ({}); se usa el local", id, invalid);
+                }
+            });
+            SyncedTunings.set(valid);
         });
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> GarageConfig.clearSyncedTuning());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> SyncedTunings.clear());
 
         // Un sonido de motor por vehículo cargado; se detiene solo cuando el vehículo desaparece
         ClientEntityEvents.ENTITY_LOAD.register((entity, level) -> {
