@@ -21,6 +21,7 @@ class GarageConfigTest {
 
     @AfterEach
     void reset() throws Exception {
+        ClientConfig.load(dir.resolve("vacio-cliente.json"));
         GarageConfig.load(dir.resolve("vacio.json"));
     }
 
@@ -166,6 +167,65 @@ class GarageConfigTest {
         assertFalse(Files.exists(dir.resolve(ClientConfig.FILE_NAME)));
         GarageConfig.load(dir.resolve("otro.json"));
         assertFalse(Files.exists(dir.resolve(ClientConfig.FILE_NAME)), "tampoco al crear uno nuevo");
+    }
+
+    @Test
+    void cargarDosVecesNoRepiteNiPisaLaMigracion() throws Exception {
+        Path file = dir.resolve("garage.json");
+        Files.writeString(file, "{\"engineVolume\": 0.25}");
+        GarageConfig.load(file);
+        Path client = dir.resolve(ClientConfig.FILE_NAME);
+        Files.writeString(client, "{\"engineVolume\": 0.8}"); // el jugador lo ajusta después
+        GarageConfig.load(file); // la clave ya no está en garage.json: no hay nada que migrar
+        ClientConfig.load(client);
+        assertEquals(0.8F, ClientConfig.get().engineVolume());
+    }
+
+    @Test
+    void unVolumenAntiguoQueNoEsUnNumeroNoSeMigraNiRompeNada() throws Exception {
+        Path file = dir.resolve("garage.json");
+        Files.writeString(file, "{\"maxFuel\": 500, \"engineVolume\": \"fuerte\"}");
+        GarageConfig.load(file);
+        assertEquals(500, GarageConfig.get().maxFuel());
+        assertFalse(Files.exists(dir.resolve(ClientConfig.FILE_NAME)));
+        assertFalse(Files.exists(dir.resolve("garage.json.bak")), "no es un archivo roto");
+    }
+
+    @Test
+    void siElGarageJsonEstaCorruptoElVolumenQuedaSoloEnElBak() throws Exception {
+        Path file = dir.resolve("garage.json");
+        Files.writeString(file, "{ \"engineVolume\": 0.25, esto no es json");
+        GarageConfig.load(file);
+        assertEquals(GarageConfig.DEFAULT, GarageConfig.get());
+        assertFalse(Files.exists(dir.resolve(ClientConfig.FILE_NAME)));
+        assertTrue(Files.readString(dir.resolve("garage.json.bak")).contains("0.25"));
+    }
+
+    @Test
+    void siNoSePuedeMigrarGarageJsonSeDejaIntactoParaNoPerderElVolumen() throws Exception {
+        Path file = dir.resolve("garage.json");
+        String original = "{\"maxFuel\": 500, \"engineVolume\": 0.25}";
+        Files.writeString(file, original);
+        Files.createDirectories(dir.resolve(ClientConfig.FILE_NAME + ".tmp/ocupado")); // la escritura fallará
+        GarageConfig.load(file);
+        assertEquals(500, GarageConfig.get().maxFuel(), "la config en memoria sí se aplica");
+        assertEquals(original, Files.readString(file), "garage.json no se reescribe sin su engineVolume");
+        assertFalse(Files.exists(dir.resolve(ClientConfig.FILE_NAME)));
+    }
+
+    @Test
+    void conUnDirectorioDeSoloLecturaNoSeLanzaNingunaExcepcion() throws Exception {
+        Path file = dir.resolve("garage.json");
+        Files.writeString(file, "{\"maxFuel\": 500, \"engineVolume\": 0.25}");
+        assertTrue(dir.toFile().setWritable(false));
+        try {
+            org.junit.jupiter.api.Assumptions.assumeFalse(Files.isWritable(dir), "el sistema ignora los permisos (root)");
+            GarageConfig.load(file); // no debe lanzar
+            assertEquals(500, GarageConfig.get().maxFuel());
+            assertTrue(Files.readString(file).contains("engineVolume"), "intacto");
+        } finally {
+            dir.toFile().setWritable(true);
+        }
     }
 
     @Test

@@ -32,28 +32,27 @@ class ClientConfigTest {
     }
 
     @Test
-    void migrateCreaElArchivoNuevoConElValorAntiguo() throws Exception {
+    void createEscribeElArchivoConElValorDado() throws Exception {
         Path file = dir.resolve("garage-client.json");
-        assertTrue(ClientConfig.migrate(file, 0.3F));
+        assertTrue(ClientConfig.create(file, 0.3F));
         ClientConfig.load(file);
         assertEquals(0.3F, ClientConfig.get().engineVolume());
     }
 
     @Test
-    void migrateNuncaPisaUnArchivoExistente() throws Exception {
+    void createAcotaUnValorFueraDeRango() throws Exception {
         Path file = dir.resolve("garage-client.json");
-        Files.writeString(file, "{\"engineVolume\": 0.9}");
-        assertFalse(ClientConfig.migrate(file, 0.1F));
+        ClientConfig.create(file, 7.0F);
         ClientConfig.load(file);
-        assertEquals(0.9F, ClientConfig.get().engineVolume());
+        assertEquals(1.0F, ClientConfig.get().engineVolume());
     }
 
     @Test
-    void migrateAcotaUnValorFueraDeRango() throws Exception {
+    void createDevuelveFalseSiNoPuedeEscribir() throws Exception {
         Path file = dir.resolve("garage-client.json");
-        ClientConfig.migrate(file, 7.0F);
-        ClientConfig.load(file);
-        assertEquals(1.0F, ClientConfig.get().engineVolume());
+        Files.createDirectories(dir.resolve("garage-client.json.tmp/ocupado")); // el temporal es un directorio
+        assertFalse(ClientConfig.create(file, 0.3F));
+        assertFalse(Files.exists(file));
     }
 
     @Test

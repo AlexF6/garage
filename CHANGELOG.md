@@ -36,6 +36,7 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 - El tope de velocidad del atropello vive en `RunOverMath`, probado, y `VehicleTuning` se serializa con `toArray`/`fromArray`.
 
 ### Fixed
+- La migración de `engineVolume` vive en `LegacyConfigMigration` y no pierde el valor: si no se puede crear `garage-client.json`, `garage.json` se deja intacto y el aviso del log ya no dice que migró. `ConfigFiles` comparte con las dos configs la copia `.bak` y la escritura con aviso.
 - Las criaturas ya no se suben solas a la moto al chocar con ella (`VehicleSpec.mobsCanBoard`).
 - Un valor `null` en una clave simple de `garage.json` (`"maxFuel": null`) conserva el valor por defecto en vez de leerse como 0.
 - `VehicleSpec.Horn` rechaza al crearse una bocina sin sonido o con volumen no positivo, en vez de fallar en el primer bocinazo.

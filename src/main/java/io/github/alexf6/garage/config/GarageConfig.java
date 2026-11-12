@@ -65,6 +65,7 @@ public record GarageConfig(int maxFuel, int fuelPerItem, VehicleTuning tuning, R
     public static void load(Path file) {
         JsonObject merged = GSON.toJsonTree(DEFAULT).getAsJsonObject();
         GarageConfig parsed;
+        boolean rewrite = true; // false si no se pudo migrar algo: el archivo se deja intacto
         try {
             if (Files.exists(file)) {
                 String text;
@@ -77,7 +78,7 @@ public record GarageConfig(int maxFuel, int fuelPerItem, VehicleTuning tuning, R
                 }
                 try {
                     JsonObject user = JsonParser.parseString(text).getAsJsonObject();
-                    migrateLegacyEngineVolume(file, user);
+                    rewrite = LegacyConfigMigration.migrateEngineVolume(file, user);
                     mergeInto(merged, user);
                     saturateInt(merged, "maxFuel");
                     saturateInt(merged, "fuelPerItem");
@@ -99,30 +100,18 @@ public record GarageConfig(int maxFuel, int fuelPerItem, VehicleTuning tuning, R
         List<String> fixes = new ArrayList<>();
         current = sanitize(parsed, fixes);
         fixes.forEach(fix -> GarageMod.LOGGER.warn("garage.json: {}", fix));
-        write(file, current);
+        if (rewrite) write(file, current);
     }
 
     /** Archivo corrupto: se conserva como {@code .bak} para que el jugador lo recupere y se crea uno nuevo. */
+    /** Archivo corrupto: se conserva como {@code .bak} para que el jugador lo recupere y se crea uno nuevo. */
     private static void backUpAndRegenerate(Path file, Exception cause) {
         current = DEFAULT;
-        Path backup = ConfigFiles.backUp(file);
-        if (backup == null) {
-            // Sin copia de seguridad no se sobrescribe el original
-            GarageMod.LOGGER.warn("{} no es válido ({}) y no se pudo guardar una copia; se usan los valores por defecto",
-                    file, cause.getMessage());
-            return;
-        }
-        GarageMod.LOGGER.warn("{} no es válido ({}); se guardó como {} y se creó uno nuevo con los valores por defecto",
-                file, cause.getMessage(), backup);
-        write(file, DEFAULT);
+        if (ConfigFiles.backUpCorrupt(file, cause)) write(file, DEFAULT);
     }
 
     private static void write(Path file, GarageConfig config) {
-        try {
-            ConfigFiles.writeAtomic(file, GSON.toJson(config));
-        } catch (IOException e) {
-            GarageMod.LOGGER.warn("No se pudo escribir {}: {}", file, e.toString());
-        }
+        ConfigFiles.write(file, GSON.toJson(config));
     }
 
     /**
@@ -173,17 +162,6 @@ public record GarageConfig(int maxFuel, int fuelPerItem, VehicleTuning tuning, R
         JsonElement element = json.get(key);
         if (element != null && element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber()) {
             json.addProperty(key, (int) Math.clamp(element.getAsDouble(), Integer.MIN_VALUE, Integer.MAX_VALUE));
-        }
-    }
-
-    /**
-     * {@code engineVolume} vivía en este archivo y ahora es de {@link ClientConfig}: antes de reescribirlo sin esa
-     * clave, el valor se pasa a {@code garage-client.json}, junto a este archivo, si todavía no existe.
-     */
-    private static void migrateLegacyEngineVolume(Path file, JsonObject user) {
-        JsonElement legacy = user.get("engineVolume");
-        if (legacy != null && legacy.isJsonPrimitive() && legacy.getAsJsonPrimitive().isNumber()) {
-            ClientConfig.migrate(file.resolveSibling(ClientConfig.FILE_NAME), legacy.getAsFloat());
         }
     }
 

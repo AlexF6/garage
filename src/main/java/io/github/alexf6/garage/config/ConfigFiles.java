@@ -1,5 +1,6 @@
 package io.github.alexf6.garage.config;
 
+import io.github.alexf6.garage.GarageMod;
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -21,6 +22,33 @@ final class ConfigFiles {
             return backup;
         } catch (IOException e) {
             return null;
+        }
+    }
+
+    /**
+     * Archivo ilegible como JSON: se guarda como {@code .bak} y se avisa. El llamador regenera el archivo solo si
+     * esto devuelve {@code true}; sin copia de seguridad no se sobrescribe el original.
+     */
+    static boolean backUpCorrupt(Path file, Exception cause) {
+        Path backup = backUp(file);
+        if (backup == null) {
+            GarageMod.LOGGER.warn("{} no es válido ({}) y no se pudo guardar una copia; se usan los valores por defecto",
+                    file, cause.getMessage());
+            return false;
+        }
+        GarageMod.LOGGER.warn("{} no es válido ({}); se guardó como {} y se creó uno nuevo con los valores por defecto",
+                file, cause.getMessage(), backup);
+        return true;
+    }
+
+    /** Escribe de forma atómica y avisa si falla en vez de lanzar: la config nunca debe tumbar el juego. */
+    static boolean write(Path file, String text) {
+        try {
+            writeAtomic(file, text);
+            return true;
+        } catch (IOException e) {
+            GarageMod.LOGGER.warn("No se pudo escribir {}: {}", file, e.toString());
+            return false;
         }
     }
 

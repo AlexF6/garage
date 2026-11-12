@@ -82,15 +82,17 @@ Las velocidades van en bloques/tick (1 b/t = 72 km/h) y los factores son lo que 
 
 ### Config del cliente
 
-`config/garage-client.json` solo la lee el cliente (el servidor dedicado no la toca) y no se sincroniza. Sigue las
+`config/garage-client.json` solo la lee el cliente y no se sincroniza. Sigue las
 mismas reglas de validación y copia de seguridad que `garage.json`.
 
 | Clave | Por defecto | Rango | Qué hace |
 |---|---|---|---|
 | `engineVolume` | 0.6 | 0 a 1 | Volumen del motor (0 lo apaga) |
 
-`engineVolume` vivía en `garage.json`: al cargar esa config por primera vez, el valor que tuvieras allí se copia a este
-archivo si todavía no existe (en un servidor dedicado también se crea, pero el servidor no lo lee).
+`engineVolume` vivía en `garage.json`: al cargar esa config, el valor que tuvieras allí se copia a este archivo si todavía
+no existe, y `garage.json` deja de llevarlo. Un servidor dedicado que aún tenga la clave antigua también crea el archivo
+(una vez), aunque no lo lee. Si no se puede crear, `garage.json` se deja como está para no perder el valor. Si
+`garage.json` está tan dañado que no se puede leer como JSON, el volumen se queda solo en su `.bak`.
 
 El servidor calcula los atropellos con la velocidad que mide entre dos ticks, limitada a la `maxSpeed` del vehículo,
 así que un cliente alterado no consigue más daño ni empuje del que permite el manejo.

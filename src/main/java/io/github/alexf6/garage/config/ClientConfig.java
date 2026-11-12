@@ -21,9 +21,10 @@ import java.util.List;
  * <p>Mismas reglas que {@link GarageConfig}: lo que falta toma el valor por defecto, lo que se sale de rango se
  * corrige y se avisa, y un archivo corrupto se guarda como {@code .bak} y se regenera.
  *
- * <p>Migración: {@code engineVolume} vivía en {@code garage.json}. Al cargar esa config, {@link GarageConfig} crea este
- * archivo con el valor que había allí si todavía no existe (ver {@link #migrate}); así no depende del orden en que
- * arranquen el servidor y el cliente.
+ * <p>Migración: {@code engineVolume} vivía en {@code garage.json}. Al cargar esa config, {@link LegacyConfigMigration}
+ * crea este archivo con el valor que había allí si todavía no existe; así no depende del orden en que arranquen el
+ * servidor y el cliente. El cliente es el único que lee este archivo, aunque un servidor dedicado que aún tenga la
+ * clave antigua lo crea una vez durante esa migración.
  *
  * @param engineVolume volumen del motor, de 0 (apagado) a 1
  */
@@ -67,18 +68,16 @@ public record ClientConfig(float engineVolume) {
     }
 
     /**
-     * Crea {@code file} con {@code volume} (acotado al rango) si todavía no existe; nunca pisa uno existente.
+     * Crea {@code file} con {@code volume} (acotado al rango y avisando si hizo falta). No comprueba si ya existe:
+     * de eso se ocupa {@link LegacyConfigMigration}.
      *
-     * @return {@code true} si lo creó
+     * @return {@code true} si quedó escrito
      */
-    static boolean migrate(Path file, float volume) {
-        if (Files.exists(file)) return false;
+    static boolean create(Path file, float volume) {
         List<String> fixes = new ArrayList<>();
         ClientConfig config = sanitize(new ClientConfig(volume), fixes);
         fixes.forEach(fix -> GarageMod.LOGGER.warn("{} (migrado de garage.json): {}", FILE_NAME, fix));
-        write(file, config);
-        GarageMod.LOGGER.info("engineVolume pasó de garage.json a {}", FILE_NAME);
-        return Files.exists(file);
+        return write(file, config);
     }
 
     /** Lee el volumen; falta o {@code null} = por defecto; cualquier otro tipo que no sea un número es un archivo dañado. */
@@ -107,22 +106,10 @@ public record ClientConfig(float engineVolume) {
 
     private static void backUpAndRegenerate(Path file, Exception cause) {
         current = DEFAULT;
-        Path backup = ConfigFiles.backUp(file);
-        if (backup == null) {
-            GarageMod.LOGGER.warn("{} no es válido ({}) y no se pudo guardar una copia; se usan los valores por defecto",
-                    file, cause.getMessage());
-            return;
-        }
-        GarageMod.LOGGER.warn("{} no es válido ({}); se guardó como {} y se creó uno nuevo con los valores por defecto",
-                file, cause.getMessage(), backup);
-        write(file, DEFAULT);
+        if (ConfigFiles.backUpCorrupt(file, cause)) write(file, DEFAULT);
     }
 
-    private static void write(Path file, ClientConfig config) {
-        try {
-            ConfigFiles.writeAtomic(file, GSON.toJson(config));
-        } catch (IOException e) {
-            GarageMod.LOGGER.warn("No se pudo escribir {}: {}", file, e.toString());
-        }
+    private static boolean write(Path file, ClientConfig config) {
+        return ConfigFiles.write(file, GSON.toJson(config));
     }
 }
