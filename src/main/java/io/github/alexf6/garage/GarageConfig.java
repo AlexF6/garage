@@ -8,6 +8,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import java.io.IOException;
+import java.nio.charset.CharacterCodingException;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -87,7 +89,14 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
         GarageConfig parsed;
         try {
             if (Files.exists(file)) {
-                String text = Files.readString(file);
+                String text;
+                try {
+                    text = Files.readString(file);
+                } catch (CharacterCodingException e) {
+                    // Bytes que no son UTF-8: el archivo está dañado, no es un problema de lectura
+                    backUpAndRegenerate(file, e);
+                    return;
+                }
                 try {
                     mergeInto(merged, JsonParser.parseString(text).getAsJsonObject());
                     saturateInt(merged, "maxFuel");
@@ -130,9 +139,16 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
         write(file, DEFAULT);
     }
 
+    /** Escribe en un archivo temporal y lo mueve de golpe, para que un corte no deje la config a medias. */
     private static void write(Path file, GarageConfig config) {
+        Path temp = file.resolveSibling(file.getFileName() + ".tmp");
         try {
-            Files.writeString(file, GSON.toJson(config));
+            Files.writeString(temp, GSON.toJson(config));
+            try {
+                Files.move(temp, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (IOException e) {
             GarageMod.LOGGER.warn("No se pudo escribir {}: {}", file, e.toString());
         }

@@ -1,5 +1,6 @@
 package io.github.alexf6.garage;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,6 +63,25 @@ class GarageConfigTest {
         assertEquals(GarageConfig.DEFAULT, GarageConfig.get());
         assertEquals("{ esto no es json", Files.readString(dir.resolve("garage.json.bak")));
         assertTrue(Files.readString(file).contains("\"maxFuel\""), "regenera el archivo con los valores por defecto");
+    }
+
+    @Test
+    void archivoConBytesQueNoSonUtf8SeTrataComoRoto() throws Exception {
+        Path file = dir.resolve("garage.json");
+        byte[] garbage = {'{', (byte) 0xC3, (byte) 0x28, '}'};
+        Files.write(file, garbage);
+        GarageConfig.load(file);
+        assertEquals(GarageConfig.DEFAULT, GarageConfig.get());
+        assertArrayEquals(garbage, Files.readAllBytes(dir.resolve("garage.json.bak")));
+        assertTrue(Files.readString(file).contains("\"maxFuel\""), "regenera el archivo");
+    }
+
+    @Test
+    void laEscrituraNoDejaArchivosTemporales() throws Exception {
+        GarageConfig.load(dir.resolve("garage.json"));
+        try (var files = Files.list(dir)) {
+            assertEquals(List.of("garage.json"), files.map(p -> p.getFileName().toString()).sorted().toList());
+        }
     }
 
     @Test
