@@ -106,6 +106,13 @@ class VehicleResourcesTest {
     }
 
     @Test
+    void laDescripcionEnInglesDeFabricModJsonEsLaDelArchivoEnUs() throws Exception {
+        String inModJson = json("fabric.mod.json").get("description").getAsString();
+        String inLang = json("assets/garage/lang/en_us.json").get("modmenu.descriptionTranslation.garage").getAsString();
+        assertEquals(inModJson, inLang);
+    }
+
+    @Test
     void lasTraduccionesDelModNoEstanVacias() throws Exception {
         for (String lang : LANGS) {
             JsonObject strings = json("assets/garage/lang/" + lang + ".json");
