@@ -2,6 +2,7 @@ package io.github.alexf6.garage.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
@@ -46,14 +47,8 @@ public record ClientConfig(float engineVolume) {
         try {
             if (Files.exists(file)) {
                 try {
-                    JsonObject user = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
-                    if (user.has("engineVolume") && !user.get("engineVolume").isJsonNull()) {
-                        parsed = new ClientConfig(user.get("engineVolume").getAsFloat());
-                    } else {
-                        parsed = DEFAULT;
-                    }
-                } catch (JsonParseException | IllegalStateException | NumberFormatException
-                         | CharacterCodingException e) {
+                    parsed = parse(JsonParser.parseString(Files.readString(file)).getAsJsonObject());
+                } catch (JsonParseException | IllegalStateException | CharacterCodingException e) {
                     backUpAndRegenerate(file, e);
                     return;
                 }
@@ -68,6 +63,16 @@ public record ClientConfig(float engineVolume) {
         current = sanitize(parsed, fixes);
         fixes.forEach(fix -> GarageMod.LOGGER.warn("garage-client.json: {}", fix));
         write(file, current);
+    }
+
+    /** Lee el volumen; falta o {@code null} = por defecto; cualquier otro tipo que no sea un número es un archivo dañado. */
+    private static ClientConfig parse(JsonObject user) {
+        JsonElement volume = user.get("engineVolume");
+        if (volume == null || volume.isJsonNull()) return DEFAULT;
+        if (!volume.isJsonPrimitive() || !volume.getAsJsonPrimitive().isNumber()) {
+            throw new IllegalStateException("engineVolume debe ser un número, no " + volume);
+        }
+        return new ClientConfig(volume.getAsFloat());
     }
 
     /** Corrige al rango válido y anota cada corrección en {@code fixes}. */

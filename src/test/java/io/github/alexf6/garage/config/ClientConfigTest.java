@@ -71,7 +71,13 @@ class ClientConfigTest {
         List<String> fixes = new ArrayList<>();
         assertEquals(ClientConfig.DEFAULT, ClientConfig.sanitize(new ClientConfig(Float.NaN), fixes));
         assertEquals(1, fixes.size());
-        assertTrue(ClientConfig.sanitize(ClientConfig.DEFAULT, new ArrayList<>()).equals(ClientConfig.DEFAULT));
+    }
+
+    @Test
+    void unVolumenValidoNoGeneraAvisos() {
+        List<String> fixes = new ArrayList<>();
+        assertEquals(new ClientConfig(0.4F), ClientConfig.sanitize(new ClientConfig(0.4F), fixes));
+        assertTrue(fixes.isEmpty());
     }
 
     @Test
@@ -85,16 +91,36 @@ class ClientConfigTest {
     }
 
     @Test
-    void bytesQueNoSonUtf8Ni_UnTipoIncorrectoSeTratanComoCorruptos() throws Exception {
+    void bytesQueNoSonUtf8SeTratanComoCorruptos() throws Exception {
         Path file = dir.resolve("garage-client.json");
         byte[] garbage = {'{', (byte) 0xC3, (byte) 0x28, '}'};
         Files.write(file, garbage);
         ClientConfig.load(file, null);
+        assertEquals(ClientConfig.DEFAULT, ClientConfig.get());
         assertArrayEquals(garbage, Files.readAllBytes(dir.resolve("garage-client.json.bak")));
-        Files.writeString(file, "{\"engineVolume\": \"fuerte\"}");
+    }
+
+    @Test
+    void unValorQueNoEsUnNumeroSeTrataComoCorrupto() throws Exception {
+        for (String content : new String[] {"{\"engineVolume\": \"fuerte\"}", "{\"engineVolume\": {}}",
+                "{\"engineVolume\": []}", "{\"engineVolume\": true}", "[1]", ""}) {
+            Path file = dir.resolve("garage-client.json");
+            Files.deleteIfExists(dir.resolve("garage-client.json.bak"));
+            Files.writeString(file, content);
+            ClientConfig.load(file, null);
+            assertEquals(ClientConfig.DEFAULT, ClientConfig.get(), content);
+            assertEquals(content, Files.readString(dir.resolve("garage-client.json.bak")), content);
+            assertTrue(Files.readString(file).contains("engineVolume"), "regenerado: " + content);
+        }
+    }
+
+    @Test
+    void unaClaveNulaUsaElValorPorDefecto() throws Exception {
+        Path file = dir.resolve("garage-client.json");
+        Files.writeString(file, "{\"engineVolume\": null}");
         ClientConfig.load(file, null);
         assertEquals(ClientConfig.DEFAULT, ClientConfig.get());
-        assertEquals("{\"engineVolume\": \"fuerte\"}", Files.readString(dir.resolve("garage-client.json.bak")));
+        assertFalse(Files.exists(dir.resolve("garage-client.json.bak")));
     }
 
     @Test
