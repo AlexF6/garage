@@ -36,6 +36,7 @@ public final class VehicleSpecs {
             .directTurnRate(2.8F)
             .enginePitch(0.7F, 1.7F)
             .leanPerSteer(0.48F)
+            .mobsCanBoard(false) // una moto no es para criaturas
             .horn(15, SoundEvents.NOTE_BLOCK_BELL, 1.2F, 1.4F)
             .tuning(() -> VehicleTuning.ENDURO)
             .build();

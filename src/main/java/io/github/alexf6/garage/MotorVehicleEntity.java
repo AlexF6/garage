@@ -303,6 +303,7 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
         if (!level().isClientSide()
                 && !other.isPassenger()
                 && getControllingPassenger() != null
+                && spec.mobsCanBoard()
                 && canAddPassenger(other)
                 && Math.abs(forwardSpeed) < GarageConfig.get().runOver().pushSpeed()
                 && other instanceof LivingEntity
