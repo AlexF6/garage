@@ -7,13 +7,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import io.github.alexf6.garage.physics.VehicleTuning;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.phys.Vec3;
 import org.junit.jupiter.api.Test;
 
 class VehicleSpecTest {
 
+    private static final Holder<SoundEvent> SOUND = Holder.direct(
+            SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath("garage", "test")));
     private static final List<Vec3> SEATS = List.of(new Vec3(0, 0.6, 0));
-    private static final VehicleSpec.Horn HORN = new VehicleSpec.Horn(10, null, 1.0F, List.of(1.0F));
+    private static final VehicleSpec.Horn HORN = new VehicleSpec.Horn(10, SOUND, 1.0F, List.of(1.0F));
 
     private static VehicleSpec spec(String id, float width, List<Vec3> seats, int color, int rows,
                                     float wheel, float head, float idle, float top, float lean) {
@@ -83,9 +88,18 @@ class VehicleSpecTest {
     }
 
     @Test
+    void laBocinaNecesitaSonidoYVolumenPositivo() {
+        assertThrows(IllegalArgumentException.class, () -> new VehicleSpec.Horn(10, null, 1.0F, List.of(1.0F)));
+        for (float volume : new float[] {0.0F, -1.0F, Float.NaN}) {
+            assertThrows(IllegalArgumentException.class,
+                    () -> new VehicleSpec.Horn(10, SOUND, volume, List.of(1.0F)), "volumen " + volume);
+        }
+    }
+
+    @Test
     void laBocinaNecesitaAlMenosUnTonoYUnEnfriamientoNoNegativo() {
-        assertThrows(IllegalArgumentException.class, () -> new VehicleSpec.Horn(10, null, 1.0F, List.of()));
-        assertThrows(IllegalArgumentException.class, () -> new VehicleSpec.Horn(-1, null, 1.0F, List.of(1.0F)));
+        assertThrows(IllegalArgumentException.class, () -> new VehicleSpec.Horn(10, SOUND, 1.0F, List.of()));
+        assertThrows(IllegalArgumentException.class, () -> new VehicleSpec.Horn(-1, SOUND, 1.0F, List.of(1.0F)));
     }
 
     @Test
@@ -107,7 +121,7 @@ class VehicleSpecTest {
                 .headTurnLimit(90.0F)
                 .directTurnRate(1.0F)
                 .enginePitch(0.5F, 1.5F)
-                .horn(10, null, 1.0F, 1.0F, 1.2F)
+                .horn(10, SOUND, 1.0F, 1.0F, 1.2F)
                 .tuning(TUNING);
     }
 
@@ -117,7 +131,7 @@ class VehicleSpecTest {
     void elBuilderAsignaCadaDatoASuCampo() {
         VehicleSpec spec = complete().leanPerSteer(0.4F).build();
         assertEquals(new VehicleSpec("bike", 1.0F, 1.2F, List.of(new Vec3(0, 0.6, 0)), 0xFF0000, 1, 0.3F, 90.0F,
-                1.0F, 0.5F, 1.5F, 0.4F, new VehicleSpec.Horn(10, null, 1.0F, List.of(1.0F, 1.2F)), TUNING), spec);
+                1.0F, 0.5F, 1.5F, 0.4F, new VehicleSpec.Horn(10, SOUND, 1.0F, List.of(1.0F, 1.2F)), TUNING), spec);
     }
 
     @Test

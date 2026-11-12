@@ -190,6 +190,7 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
         for (Map.Entry<String, JsonElement> entry : user.entrySet()) {
             JsonElement current = base.get(entry.getKey());
             if (current == null) continue; // clave desconocida (o de una versión vieja): se descarta
+            if (entry.getValue().isJsonNull() && !current.isJsonObject()) continue; // "clave": null = valor por defecto
             if (current.isJsonObject() && entry.getValue().isJsonObject()) {
                 mergeInto(current.getAsJsonObject(), entry.getValue().getAsJsonObject());
             } else {

@@ -115,6 +115,15 @@ class GarageConfigTest {
     }
 
     @Test
+    void unaClaveNulaUsaElValorPorDefecto() throws Exception {
+        Path file = dir.resolve("garage.json");
+        Files.writeString(file, "{\"maxFuel\": null, \"fuelPerItem\": null, \"engineVolume\": null}");
+        GarageConfig.load(file);
+        assertEquals(GarageConfig.DEFAULT, GarageConfig.get());
+        assertFalse(Files.exists(dir.resolve("garage.json.bak")), "no es un archivo roto");
+    }
+
+    @Test
     void combustibleFueraDeRangoSeAcotaYSeAvisa() throws Exception {
         Path file = dir.resolve("garage.json");
         Files.writeString(file, "{\"maxFuel\": 2000000000, \"fuelPerItem\": 2000000000, \"engineVolume\": 5.0}");

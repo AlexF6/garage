@@ -79,6 +79,8 @@ public record VehicleSpec(
     public record Horn(int cooldownTicks, Holder<SoundEvent> sound, float volume, List<Float> pitches) {
         public Horn {
             if (cooldownTicks < 0) throw new IllegalArgumentException("cooldownTicks no puede ser negativo");
+            if (sound == null) throw new IllegalArgumentException("la bocina necesita un sonido");
+            if (!(volume > 0)) throw new IllegalArgumentException("el volumen de la bocina debe ser positivo");
             if (pitches == null || pitches.isEmpty()) throw new IllegalArgumentException("la bocina necesita un tono");
             pitches = List.copyOf(pitches);
         }
