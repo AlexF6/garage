@@ -42,37 +42,45 @@ el mod está pensado para sumar más vehículos. Hay que tener el mod en cliente
 ## Configuración
 
 `config/garage.json` se crea al primer arranque. Las claves que falten se completan con su valor por defecto y el
-archivo se reescribe. Si un valor de `tuning` es inválido se usa el manejo por defecto, y si el archivo no se puede
-leer se usan los valores por defecto sin modificarlo. Hay que reiniciar el juego para aplicar cambios.
+archivo se reescribe. Hay que reiniciar el juego (o el servidor) para aplicar cambios.
+
+- Un valor fuera de rango se corrige al límite más cercano, se avisa en el log y el archivo se reescribe ya corregido.
+  Un `tuning` inválido se sustituye entero por el manejo por defecto.
+- Si el archivo no es JSON válido (o un valor tiene el tipo equivocado) se guarda como `garage.json.bak`, se crea
+  uno nuevo con los valores por defecto y se avisa en el log. Si no se puede leer por permisos, se juega con los
+  valores por defecto sin tocarlo.
+- Es una config **de servidor**: en multijugador manda la del servidor. El `tuning` del Jeep se envía a cada cliente al
+  conectarse y reemplaza al suyo mientras dure la conexión. La moto y el motocarro usan perfiles fijos del mod
+  (`ENDURO` y `MOTOCARRO`) y no leen `tuning`.
 
 Las velocidades van en bloques/tick (1 b/t = 72 km/h) y los factores son lo que se conserva por tick
 (1 = no frena, 0 = frena en seco).
 
-| Clave | Por defecto | Qué hace |
-|---|---|---|
-| `maxFuel` | 12000 | Ticks de acelerador con el tanque lleno |
-| `fuelPerItem` | 1600 | Ticks que suma cada carbón |
-| `engineVolume` | 0.6 | Volumen del motor, de 0 a 1 (0 lo apaga) |
-| `tuning.maxSpeed` / `maxReverse` | 0.6 / 0.2 | Velocidad máxima hacia adelante / en reversa |
-| `tuning.accel` / `reverseAccel` | 0.03 / 0.02 | Aceleración al arrancar (se suaviza al acercarse al máximo) |
-| `tuning.brake` / `handbrake` | 0.04 / 0.035 | Velocidad que quita por tick el freno / el freno de mano |
-| `tuning.rollingFriction` | 0.98 | Factor sin acelerar, en el suelo |
-| `tuning.airDrag` / `waterDrag` | 0.995 / 0.85 | Factor en el aire / en el agua |
-| `tuning.wheelBase` | 1.75 | Distancia entre ejes en bloques: más larga, giro más abierto |
-| `tuning.maxSteerLow` / `maxSteerHigh` | 0.6 / 0.2 | Ángulo máximo del volante (radianes, menor que 1.57) detenido / a velocidad máxima |
-| `tuning.steerRate` | 0.1 | Cuánto se mueve el volante por tick |
-| `tuning.grip` | 0.3 | Factor de la velocidad lateral con agarre normal |
-| `tuning.driftGrip` | 0.92 | Factor de la velocidad lateral con freno de mano (más alto, más derrape) |
-| `tuning.driftYawBoost` | 1.6 | Cuánto más gira el carro mientras derrapa |
-| `runOver.enabled` | true | Empujar y atropellar criaturas |
-| `runOver.pushSpeed` | 0.1 | Velocidad desde la que empuja |
-| `runOver.damageSpeed` | 0.25 | Velocidad desde la que además lastima |
-| `runOver.damagePerSpeed` | 25.0 | Daño por cada b/t por encima de `damageSpeed` (a tope: 8.75, unos 4 corazones) |
-| `runOver.knockback` | 1.2 | Fuerza del empuje a velocidad máxima |
-| `runOver.hurtPlayers` | false | Lastimar también a otros jugadores |
+| Clave | Por defecto | Rango | Qué hace |
+|---|---|---|---|
+| `maxFuel` | 12000 | 1 a 1 000 000 | Ticks de acelerador con el tanque lleno |
+| `fuelPerItem` | 1600 | 0 a `maxFuel` | Ticks que suma cada carbón |
+| `engineVolume` | 0.6 | 0 a 1 | Volumen del motor (0 lo apaga) |
+| `tuning.maxSpeed` / `maxReverse` | 0.6 / 0.2 | mayor que 0, hasta 3 | Velocidad máxima hacia adelante / en reversa (b/t) |
+| `tuning.accel` / `reverseAccel` | 0.03 / 0.02 | mayor que 0, hasta 1 | Aceleración al arrancar (se suaviza al acercarse al máximo) |
+| `tuning.brake` / `handbrake` | 0.04 / 0.035 | 0 a 1 | Velocidad que quita por tick el freno / el freno de mano |
+| `tuning.rollingFriction` | 0.98 | 0 a 1 | Factor sin acelerar, en el suelo |
+| `tuning.airDrag` / `waterDrag` | 0.995 / 0.85 | 0 a 1 | Factor en el aire / en el agua |
+| `tuning.wheelBase` | 1.75 | mayor que 0, hasta 16 | Distancia entre ejes en bloques: más larga, giro más abierto |
+| `tuning.maxSteerLow` / `maxSteerHigh` | 0.6 / 0.2 | 0 a menos de 1.57 | Ángulo máximo del volante (radianes) detenido / a velocidad máxima |
+| `tuning.steerRate` | 0.1 | mayor que 0, hasta 1 | Cuánto se mueve el volante por tick (radianes) |
+| `tuning.grip` | 0.3 | 0 a 1 | Factor de la velocidad lateral con agarre normal |
+| `tuning.driftGrip` | 0.92 | 0 a 1 | Factor de la velocidad lateral con freno de mano (más alto, más derrape) |
+| `tuning.driftYawBoost` | 1.6 | mayor que 0, hasta 10 | Cuánto más gira el carro mientras derrapa |
+| `runOver.enabled` | true | true / false | Empujar y atropellar criaturas |
+| `runOver.pushSpeed` | 0.1 | 0 a 10 | Velocidad desde la que empuja (b/t) |
+| `runOver.damageSpeed` | 0.25 | `pushSpeed` a 10 | Velocidad desde la que además lastima (b/t) |
+| `runOver.damagePerSpeed` | 25.0 | 0 a 1000 | Daño por cada b/t por encima de `damageSpeed` (a tope: 8.75, unos 4 corazones) |
+| `runOver.knockback` | 1.2 | 0 a 10 | Fuerza del empuje a velocidad máxima |
+| `runOver.hurtPlayers` | false | true / false | Lastimar también a otros jugadores |
 
-En un servidor dedicado, la física la calcula el cliente de cada conductor con su propio `tuning`; el combustible y
-los atropellos los decide el servidor con el suyo. Conviene que `tuning` coincida en todos.
+El servidor calcula los atropellos con la velocidad que mide entre dos ticks, limitada a la `maxSpeed` del vehículo,
+así que un cliente alterado no consigue más daño ni empuje del que permite el manejo.
 
 ## Desarrollo
 
@@ -81,9 +89,10 @@ los atropellos los decide el servidor con el suyo. Conviene que `tuning` coincid
 ./gradlew build       # compila, prueba y deja el jar en build/libs/
 ```
 
-El build solo escribe dentro del proyecto. Para que además copie el jar a tu carpeta de mods, define `modsDir` (y,
-opcionalmente, `exportDir`) en tu `~/.gradle/gradle.properties` o pásalo con `-PmodsDir=...`. `modsDir` también borra
-los jars anteriores de este mod en esa carpeta.
+El build solo escribe dentro del proyecto. Para copiar el jar a tu carpeta de mods, define `modsDir` (y,
+opcionalmente, `exportDir`) en tu `~/.gradle/gradle.properties` o pásalo con `-PmodsDir=...`, y ejecuta a mano
+`./gradlew installMod` (o `exportMod`); no se lanzan solas con `build`. `installMod` también borra los jars anteriores
+de este mod en esa carpeta.
 
 Sigue el patrón del bote vanilla: el cliente del conductor simula el movimiento y el servidor recibe la posición. El
 combustible y el color viven en el servidor y se sincronizan; las ruedas, la suspensión y el sonido salen del
@@ -91,20 +100,32 @@ movimiento observado, así que se ven igual para todos sin paquetes extra.
 
 | Clase | Responsabilidad |
 |---|---|
-| `CarEntity`, `MotorcycleEntity`, `MotocarroEntity` | Entidades: manejo, combustible, atropellos, asientos, alforja/baúl e interacciones |
-| `physics/CarPhysics` | Funciones puras del manejo: velocidad, volante, giro tipo bicicleta y derrape |
-| `physics/CarTuning`, `CarInput` | Parámetros de un vehículo (`WILLYS`, `ENDURO`, `MOTOCARRO`) y entrada inmutable del conductor |
+| `MotorVehicleEntity` | Entidad única de todos los vehículos: estado, combustible, asientos e interacciones. Lo que cambia de uno a otro lo dicta su `VehicleSpec` |
+| `ChestVehicleEntity` | Base con el baúl de 1 a 3 filas: guardado, menú, botín y vaciado al destruirse |
+| `VehicleSpec`, `VehicleSpecs` | Datos de cada vehículo (tamaño, asientos, color, baúl, ruedas, tonos, bocina, inclinación, manejo) y catálogo `ALL` |
+| `ModVehicles`, `VehicleItem` | Registro de la entidad y el ítem de cada `VehicleSpec` (desde `onInitialize`) e ítem que lo pone conservando color y nombre |
+| `RunOverPusher`, `DismountLocator` | Atropello y empuje de criaturas (servidor, con la velocidad acotada) y punto por donde baja cada pasajero |
+| `physics/VehiclePhysics` | Funciones puras del manejo: velocidad, volante, giro tipo bicicleta y derrape |
+| `physics/VehicleMath` | Funciones puras de la entidad: rumbo, giro directo, salida, empuje, rodado, dirección visual y combustible |
+| `physics/VehicleTuning`, `VehicleInput` | Parámetros de un vehículo (`WILLYS`, `ENDURO`, `MOTOCARRO`) con sus límites, y entrada inmutable del conductor |
 | `physics/Suspension` | Resortes del cabeceo, el balanceo y el rebote (solo visual) |
-| `CarConfig` | Lee, completa y valida `config/garage.json` |
-| `CarItem`, `ModItems`, `ModEntities` | Ítem parametrizado que pone cualquier vehículo (conserva color y nombre), registros y asientos |
-| `HornPayload` | Paquete cliente → servidor de la bocina |
-| `client/GarageClient` | Teclas del conductor, bocina y arranque del sonido del motor |
-| `client/CarModels`, `CarRenderer` | Modelo del Jeep en dos capas, ruedas, suspensión y bandera |
-| `client/MotorcycleModels`, `MotorcycleRenderer` | Modelo de la moto XTZ en dos capas, horquilla inclinada (rake), ruedas y tumbada (lean) |
-| `client/MotocarroModels`, `MotocarroRenderer` | Modelo del motocarro en dos capas, tren delantero Delta, suspensión y balanceo centrífugo |
-| `client/CarEngineSound` | Motor en bucle cuyo tono sube con la velocidad según el rango de cada vehículo |
+| `GarageConfig` | Lee, completa, valida y respalda `config/garage.json` |
+| `HornPayload`, `TuningSyncPayload` | Paquetes: bocina (cliente → servidor) y manejo del Jeep (servidor → cliente, al conectar) |
+| `client/GarageClient` | Teclas del conductor, bocina, recepción del manejo y arranque del sonido del motor |
+| `client/ClientVehicles`, `VehicleRenderer` | Tabla de modelos por vehículo y renderer común (carrocería teñida + resto sin teñir) |
+| `client/CarModels` | Modelo del Jeep en dos capas, ruedas, suspensión y bandera |
+| `client/MotorcycleModels` | Modelo de la moto XTZ en dos capas, horquilla inclinada (rake), ruedas y tumbada (lean) |
+| `client/MotocarroModels` | Modelo del motocarro en dos capas, tren delantero Delta, suspensión y balanceo centrífugo |
+| `client/EngineSound` | Motor en bucle cuyo tono sube con la velocidad según el rango de cada vehículo |
 
-Para agregar otro vehículo basta otra instancia de `CarTuning`, sin tocar `CarPhysics`.
+Para agregar otro vehículo:
+
+1. Un `VehicleTuning` nuevo en `physics/` (o reutilizar uno) y una entrada en `VehicleSpecs` (incluida en `ALL`).
+2. Su modelo (`*Models` con las capas `BODY` y `TRIM`) y una entrada en `client/ClientVehicles`.
+3. Datos: textura de entidad, textura e `items/*.json` e ítem, receta y claves de `lang/` en los tres idiomas.
+
+No hace falta tocar `VehiclePhysics`, `MotorVehicleEntity`, `ModVehicles` ni `GarageClient`. `ClientVehicles` falla al
+arrancar si falta la entrada de algún vehículo.
 
 Reglas del modelo: las piezas solo se tocan, nunca se solapan con caras en el mismo plano (si no, parpadean). Todo lo
 que no son ruedas cuelga de `chassis`, para que la suspensión mueva la carrocería sin mover las ruedas.

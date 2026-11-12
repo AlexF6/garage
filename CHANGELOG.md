@@ -5,15 +5,38 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 
 ## [Unreleased]
 
+### Changed
+- Un solo `MotorVehicleEntity` para todos los vehículos, descrito por un `VehicleSpec` (`VehicleSpecs`): añadir uno ya no obliga a tocar el registro, el ítem ni el arranque del cliente. `MotorcycleEntity` y `MotocarroEntity` desaparecen; los identificadores de entidad, ítem y config no cambian, así que las partidas guardadas siguen funcionando.
+- Un solo `VehicleRenderer` (con `ClientVehicles`) en lugar de tres renderers casi idénticos.
+- Los registros pasan a `ModVehicles.register()`, llamado desde `onInitialize`.
+- `CarEntity`, `CarItem`, `CarConfig` y `CarEngineSound` pasan a llamarse `MotorVehicleEntity`, `VehicleItem`, `GarageConfig` y `EngineSound` porque sirven a todos los vehículos.
+- `VehiclePhysics`, `VehicleTuning` y `VehicleInput` (antes `Car*`) y el baúl (`ChestVehicleEntity`) salen de la entidad; el registro de renderers usa `EntityRenderers`, sin la API obsoleta de Fabric.
+- El atropello y la salida de pasajeros salen de la entidad a `RunOverPusher` y `DismountLocator`; la matemática sin Minecraft, a `VehicleMath` (con pruebas).
+- `installMod` y `exportMod` ya no se enganchan a `assemble`: se ejecutan a mano. La versión de JUnit se mueve a `gradle.properties` y se añade `.editorconfig`.
+- El README documenta el rango de cada opción.
+
+### Fixed
+- Un `garage.json` corrupto ahora se guarda como `garage.json.bak` y se regenera con los valores por defecto, en lugar de dejarlo intacto y jugar sin avisar.
+- Los valores fuera de rango (`maxFuel`, `fuelPerItem`, `engineVolume` y `runOver`) se corrigen **y se avisan en el log**.
+- `maxFuel` y `fuelPerItem` tienen tope (1 000 000): antes un valor enorme desbordaba el cálculo del porcentaje de combustible.
+- Un número fuera del rango de `int` en la config se satura en lugar de dar la vuelta.
+- `VehicleTuning` rechaza valores por encima de límites razonables (velocidad, aceleración, distancia entre ejes, etc.) y NaN.
+- El servidor acota la velocidad medida en los atropellos a la `maxSpeed` del vehículo, y su zona de búsqueda con ella.
+- Un atropello con `pushSpeed` en 0 y el vehículo parado ya no genera una dirección NaN.
+- El `tuning` del Jeep lo manda el servidor al conectar (`TuningSyncPayload`) y el cliente deja de usar el suyo.
+- Cada vehículo suelta su propio ítem (`getDropItem` ya no cae por defecto en el Jeep).
+- Un vehículo aparcado (sin conductor, en el suelo y quieto) solo recalcula su física cada 10 ticks, que basta para detectar que le quitaron el suelo.
+- El servidor ya no calcula animaciones (ruedas, dirección, inclinación) que solo se ven en el cliente.
+
 ### Added
 - Motocarro urbano (Bajaj RE / "Torito") de 3 asientos (1 conductor + 2 pasajeros): configuración Delta de 3 ruedas, baúl de 18 casillas, carrocería teñible con tintes vanilla (blanco glaciar por defecto), lona de techo negra y receta de crafteo.
 - Física y cinemática del motocarro: balanceo centrífugo (*body roll*) hacia el exterior de las curvas, radio de giro cerrado, suspensión reactiva, vibración en ralentí con el motor encendido y bocina aguda.
 - Modelo nativo del motocarro en dos capas (`BODY` tintable y `TRIM` fija) con lienzo UV 256x256 (`MotocarroModels`, `MotocarroRenderer`).
-- Moto Enduro (Yamaha XTZ 125) de 2 asientos en tándem: tuning ágil `CarTuning.ENDURO`, inclinación lateral dinámica (*lean angle*) al doblar en curvas, alforja de 9 casillas, color teñible con tintes (azul Yamaha Racing Blue por defecto) y receta de crafteo.
+- Moto Enduro (Yamaha XTZ 125) de 2 asientos en tándem: tuning ágil `VehicleTuning.ENDURO`, inclinación lateral dinámica (*lean angle*) al doblar en curvas, alforja de 9 casillas, color teñible con tintes (azul Yamaha Racing Blue por defecto) y receta de crafteo.
 - Modelo 3D y renderizador nativo (`MotorcycleModels`, `MotorcycleRenderer`) en dos capas con horquilla inclinada (*rake* -24°), ruedas de radios (rin 21" / 18") y vibración en ralentí.
 - Herencia común en `CarEntity`, `CarItem` y `CarEngineSound` para compartir colisiones, inventario, combustible, atropellos (`runOver`) y sonido de motor parametrizado entre todos los vehículos.
 
-## [1.0.0]
+## [1.0.0] - 2026-11-10
 
 ### Added
 - Jeep Willys "Yipao" de 4 asientos: combustible, baúl de 27 espacios, colores con tintes, bocina, atropello y empuje
