@@ -25,8 +25,8 @@ public final class VehicleSpecs {
 
     public static final VehicleSpec MOTORCYCLE = VehicleSpec.builder("motorcycle")
             .size(0.85F, 1.25F)
-            // El sillín del modelo va de z = +0.09 (conductor) a -0.59 (pasajero); se sientan en su mitad trasera
-            .seats(new Vec3(0.0, 0.62, -0.2), new Vec3(0.0, 0.72, -0.55))
+            // Sillín de dos niveles: conductor (tope 1.05, z de +0.09 a -0.25) y pasajero (tope 1.12, hasta -0.59)
+            .seats(new Vec3(0.0, 1.05, -0.08), new Vec3(0.0, 1.12, -0.42))
             .color(0x1846C7) // azul Yamaha Racing Blue
             .chestRows(1) // alforja de 9 casillas
             .wheelRadius(0.35F)
