@@ -36,6 +36,13 @@ public class GarageClient implements ClientModInitializer {
     private static final KeyMapping HORN =
             KeyMappingHelper.registerKeyMapping(new KeyMapping("key.garage.horn", InputConstants.KEY_H, CATEGORY));
 
+    /** Consume las pulsaciones pendientes de una tecla sin hacer nada con ellas. */
+    private static void discardClicks(KeyMapping key) {
+        while (key.consumeClick()) {
+            // solo vaciar la cola
+        }
+    }
+
     @Override
     public void onInitializeClient() {
         ClientConfig.load(FabricLoader.getInstance().getConfigDir().resolve(ClientConfig.FILE_NAME));
@@ -81,9 +88,7 @@ public class GarageClient implements ClientModInitializer {
                     ClientPlayNetworking.send(new HornPayload());
                 }
             } else {
-                while (HORN.consumeClick()) {
-                    // descartar pulsaciones fuera del vehículo
-                }
+                discardClicks(HORN); // fuera del vehículo la bocina no suena: se descartan las pulsaciones
             }
         });
     }
