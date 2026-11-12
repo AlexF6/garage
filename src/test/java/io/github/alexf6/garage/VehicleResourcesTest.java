@@ -109,7 +109,9 @@ class VehicleResourcesTest {
     void lasTraduccionesDelModNoEstanVacias() throws Exception {
         for (String lang : LANGS) {
             JsonObject strings = json("assets/garage/lang/" + lang + ".json");
-            assertTrue(strings.has("modmenu.descriptionTranslation.garage"), lang + " sin descripción del mod");
+            String key = "modmenu.descriptionTranslation.garage";
+            assertTrue(strings.has(key), lang + " sin descripción del mod");
+            assertFalse(strings.get(key).getAsString().isBlank(), lang + ": descripción vacía");
         }
     }
 }

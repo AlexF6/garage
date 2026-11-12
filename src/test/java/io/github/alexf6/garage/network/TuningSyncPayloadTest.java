@@ -50,6 +50,18 @@ class TuningSyncPayloadTest {
     }
 
     @Test
+    void unIdMasLargoQueElLimiteSeRechazaAlEscribirYAlLeer() {
+        String tooLong = "x".repeat(TuningSyncPayload.MAX_ID_LENGTH + 1);
+        FriendlyByteBuf out = new FriendlyByteBuf(Unpooled.buffer());
+        assertThrows(RuntimeException.class,
+                () -> TuningSyncPayload.write(out, new TuningSyncPayload(Map.of(tooLong, VehicleTuning.WILLYS))));
+        FriendlyByteBuf in = new FriendlyByteBuf(Unpooled.buffer());
+        in.writeVarInt(1);
+        in.writeUtf(tooLong, 1000); // un servidor hostil no respeta el límite
+        assertThrows(RuntimeException.class, () -> TuningSyncPayload.read(in));
+    }
+
+    @Test
     void elMapaDelPaqueteEsInmutable() {
         java.util.HashMap<String, VehicleTuning> source = new java.util.HashMap<>();
         source.put("car", VehicleTuning.WILLYS);
