@@ -42,8 +42,9 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Vehículo motorizado: una sola clase para todos los vehículos del mod (el Jeep, la moto, el motocarro y el
- * motocarguero); lo que cambia de uno a otro lo dicta su {@link VehicleSpec}. Sigue el patrón del bote vanilla: el cliente del conductor calcula la física y
- * el servidor recibe la posición; el combustible y el color viven en el servidor y se sincronizan.
+ * motocarguero); lo que cambia de uno a otro lo dicta su {@link VehicleSpec}. Sigue el patrón del bote vanilla: el
+ * cliente del conductor calcula la física y el servidor recibe la posición; el combustible y el color viven en el
+ * servidor y se sincronizan.
  */
 public class MotorVehicleEntity extends ChestVehicleEntity {
 

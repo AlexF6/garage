@@ -1,6 +1,5 @@
 package io.github.alexf6.garage.client;
 
-
 import io.github.alexf6.garage.MotorVehicleEntity;
 import io.github.alexf6.garage.VehicleSpec;
 import io.github.alexf6.garage.config.ClientConfig;
