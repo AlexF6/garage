@@ -1,8 +1,9 @@
 package io.github.alexf6.garage.client;
 
-import io.github.alexf6.garage.client.VehicleRenderer.VehicleRenderState;
 import static io.github.alexf6.garage.client.ModelKit.at;
 import static io.github.alexf6.garage.client.ModelKit.cube;
+
+import io.github.alexf6.garage.client.VehicleRenderer.VehicleRenderState;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;

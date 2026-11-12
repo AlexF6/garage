@@ -4,9 +4,9 @@ import io.github.alexf6.garage.GarageMod;
 import io.github.alexf6.garage.VehicleSpec;
 import io.github.alexf6.garage.VehicleSpecs;
 import java.util.Map;
+import java.util.function.Supplier;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.resources.Identifier;
-import java.util.function.Supplier;
 
 /**
  * Aspecto de cada {@link VehicleSpec} en el cliente: una entrada por vehículo, con su modelo y textura.

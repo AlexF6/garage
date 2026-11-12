@@ -6,8 +6,8 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.util.Mth;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
 
 /** Atajos comunes de los modelos de cubos de los vehículos. */
 final class ModelKit {

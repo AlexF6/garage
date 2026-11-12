@@ -1,17 +1,16 @@
 package io.github.alexf6.garage.config;
 
-import io.github.alexf6.garage.GarageMod;
-import io.github.alexf6.garage.network.SyncedTunings;
-import io.github.alexf6.garage.network.TuningSyncPayload;
-
-import io.github.alexf6.garage.physics.RunOverRules;
-import io.github.alexf6.garage.physics.VehicleTuning;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import io.github.alexf6.garage.GarageMod;
+import io.github.alexf6.garage.network.SyncedTunings;
+import io.github.alexf6.garage.network.TuningSyncPayload;
+import io.github.alexf6.garage.physics.RunOverRules;
+import io.github.alexf6.garage.physics.VehicleTuning;
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
 import java.nio.file.Files;

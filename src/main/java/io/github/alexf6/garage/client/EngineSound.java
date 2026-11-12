@@ -2,8 +2,8 @@ package io.github.alexf6.garage.client;
 
 
 import io.github.alexf6.garage.MotorVehicleEntity;
-import io.github.alexf6.garage.config.ClientConfig;
 import io.github.alexf6.garage.VehicleSpec;
+import io.github.alexf6.garage.config.ClientConfig;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundEvents;

@@ -2,7 +2,6 @@ package io.github.alexf6.garage.network;
 
 import io.github.alexf6.garage.MotorVehicleEntity;
 import io.github.alexf6.garage.VehicleSpec;
-
 import io.github.alexf6.garage.physics.VehicleTuning;
 import java.util.Map;
 

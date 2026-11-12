@@ -2,12 +2,11 @@ package io.github.alexf6.garage;
 
 import io.github.alexf6.garage.config.GarageConfig;
 import io.github.alexf6.garage.network.SyncedTunings;
-
+import io.github.alexf6.garage.physics.VehicleAnimation;
 import io.github.alexf6.garage.physics.VehicleInput;
+import io.github.alexf6.garage.physics.VehicleMath;
 import io.github.alexf6.garage.physics.VehiclePhysics;
 import io.github.alexf6.garage.physics.VehicleTuning;
-import io.github.alexf6.garage.physics.VehicleMath;
-import io.github.alexf6.garage.physics.VehicleAnimation;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;

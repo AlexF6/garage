@@ -1,32 +1,31 @@
 package io.github.alexf6.garage.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import io.github.alexf6.garage.GarageMod;
+import io.github.alexf6.garage.ModVehicles;
+import io.github.alexf6.garage.MotorVehicleEntity;
+import io.github.alexf6.garage.VehicleSpec;
+import io.github.alexf6.garage.VehicleSpecs;
+import io.github.alexf6.garage.config.ClientConfig;
 import io.github.alexf6.garage.network.HornPayload;
 import io.github.alexf6.garage.network.SyncedTunings;
 import io.github.alexf6.garage.network.TuningSyncPayload;
-
-import io.github.alexf6.garage.MotorVehicleEntity;
-import io.github.alexf6.garage.GarageMod;
-import io.github.alexf6.garage.config.ClientConfig;
-import io.github.alexf6.garage.ModVehicles;
-import io.github.alexf6.garage.VehicleSpec;
-import io.github.alexf6.garage.VehicleSpecs;
 import io.github.alexf6.garage.physics.VehicleInput;
 import io.github.alexf6.garage.physics.VehicleTuning;
 import java.util.HashMap;
 import java.util.Map;
-import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Input;
 

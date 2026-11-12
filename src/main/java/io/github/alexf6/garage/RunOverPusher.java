@@ -1,7 +1,6 @@
 package io.github.alexf6.garage;
 
 import io.github.alexf6.garage.config.GarageConfig;
-
 import io.github.alexf6.garage.physics.RunOverMath;
 import io.github.alexf6.garage.physics.RunOverRules;
 import io.github.alexf6.garage.physics.VehicleMath;
