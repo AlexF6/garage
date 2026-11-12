@@ -50,6 +50,8 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
     private static final double DEFAULT_GRAVITY = 0.08; // bloques/tick²
     private static final float STEP_HEIGHT = 1.0F; // sube bloques completos sin saltar
     private static final int INTERPOLATION_STEPS = 3;
+    private static final int PARKED_DRIVE_INTERVAL = 10; // ticks entre comprobaciones de un vehículo aparcado
+    private static final double PARKED_MOTION_SQR = 1.0e-6; // (bloques/tick)²
 
     private static final EntityDataAccessor<Integer> DATA_FUEL =
             SynchedEntityData.defineId(MotorVehicleEntity.class, EntityDataSerializers.INT);
@@ -157,7 +159,8 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
         LivingEntity driver = getControllingPassenger();
         if (isLocalInstanceAuthoritative()) {
             if (driver == null) input = VehicleInput.NONE;
-            drive();
+            // Aparcado y quieto: basta comprobar el suelo cada medio segundo en vez de cada tick
+            if (!isParked(driver) || this.tickCount % PARKED_DRIVE_INTERVAL == 0) drive();
         }
         // Después de moverse: si no, en el cliente del conductor el giro y la distancia del tick valen 0
         deltaRotation = Mth.wrapDegrees(getYRot() - this.yRotO);
@@ -166,6 +169,11 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
         if (level() instanceof ServerLevel serverLevel) {
             serverTick(serverLevel, driver);
         }
+    }
+
+    /** Sin conductor, apoyado en el suelo y sin moverse: no hay física que calcular salvo que le quiten el suelo. */
+    private boolean isParked(LivingEntity driver) {
+        return driver == null && onGround() && getDeltaMovement().lengthSqr() < PARKED_MOTION_SQR;
     }
 
     private void drive() {
@@ -197,13 +205,15 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
 
     /**
      * Velocidad observada a partir del movimiento real (sirve igual en el conductor, en otros jugadores y con
-     * interpolación) y anima las ruedas, la dirección, la inclinación y, en el cliente, la suspensión.
+     * interpolación). En el cliente además anima las ruedas, la dirección, la suspensión y la inclinación.
      */
     private void observeMotion() {
         double forward = VehicleMath.forwardOf(getX() - this.xo, getZ() - this.zo, getYRot());
         double longAccel = forward - this.forwardSpeed;
         this.forwardSpeed = forward;
-        animate(forward, longAccel);
+        if (level().isClientSide()) {
+            animate(forward, longAccel);
+        }
     }
 
     /**
@@ -212,9 +222,7 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
      */
     private void animate(double forward, double longAccel) {
         VehicleTuning tuning = tuning();
-        if (level().isClientSide()) {
-            suspension.tick(longAccel, forward * Math.toRadians(deltaRotation), getY() - this.yo);
-        }
+        suspension.tick(longAccel, forward * Math.toRadians(deltaRotation), getY() - this.yo);
 
         this.wheelRollO = this.wheelRoll;
         this.wheelRoll += (float) (forward / spec.wheelRadius());
