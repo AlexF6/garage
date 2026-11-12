@@ -19,32 +19,14 @@ public record TuningSyncPayload(VehicleTuning tuning) implements CustomPacketPay
     public static final StreamCodec<RegistryFriendlyByteBuf, TuningSyncPayload> CODEC = new StreamCodec<>() {
         @Override
         public TuningSyncPayload decode(RegistryFriendlyByteBuf buf) {
-            return new TuningSyncPayload(new VehicleTuning(
-                    buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(),
-                    buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(),
-                    buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(),
-                    buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble()));
+            double[] values = new double[VehicleTuning.FIELD_COUNT];
+            for (int i = 0; i < values.length; i++) values[i] = buf.readDouble();
+            return new TuningSyncPayload(VehicleTuning.fromArray(values));
         }
 
         @Override
         public void encode(RegistryFriendlyByteBuf buf, TuningSyncPayload payload) {
-            VehicleTuning t = payload.tuning();
-            buf.writeDouble(t.maxSpeed());
-            buf.writeDouble(t.maxReverse());
-            buf.writeDouble(t.accel());
-            buf.writeDouble(t.reverseAccel());
-            buf.writeDouble(t.brake());
-            buf.writeDouble(t.handbrake());
-            buf.writeDouble(t.rollingFriction());
-            buf.writeDouble(t.airDrag());
-            buf.writeDouble(t.waterDrag());
-            buf.writeDouble(t.wheelBase());
-            buf.writeDouble(t.maxSteerLow());
-            buf.writeDouble(t.maxSteerHigh());
-            buf.writeDouble(t.steerRate());
-            buf.writeDouble(t.grip());
-            buf.writeDouble(t.driftGrip());
-            buf.writeDouble(t.driftYawBoost());
+            for (double value : payload.tuning().toArray()) buf.writeDouble(value);
         }
     };
 

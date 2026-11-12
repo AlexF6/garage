@@ -63,6 +63,25 @@ public record VehicleTuning(
             0.22, 0.90, 1.7
     );
 
+    /** Número de parámetros de {@link #toArray()}. */
+    public static final int FIELD_COUNT = 16;
+
+    /** Los parámetros en el orden de declaración, para serializarlos sin repetir cada campo a mano. */
+    public double[] toArray() {
+        return new double[] {maxSpeed, maxReverse, accel, reverseAccel, brake, handbrake, rollingFriction, airDrag,
+                waterDrag, wheelBase, maxSteerLow, maxSteerHigh, steerRate, grip, driftGrip, driftYawBoost};
+    }
+
+    /** Inversa de {@link #toArray()}; {@code values} debe tener {@link #FIELD_COUNT} elementos. */
+    public static VehicleTuning fromArray(double[] values) {
+        if (values.length != FIELD_COUNT) {
+            throw new IllegalArgumentException("se esperaban " + FIELD_COUNT + " valores y llegaron " + values.length);
+        }
+        return new VehicleTuning(values[0], values[1], values[2], values[3], values[4], values[5], values[6],
+                values[7], values[8], values[9], values[10], values[11], values[12], values[13], values[14],
+                values[15]);
+    }
+
     /** Tope de velocidad (bloques/tick; 3 = 216 km/h): más rápido el vehículo se sale de los chunks cargados. */
     public static final double SPEED_LIMIT = 3.0;
     /** Tope de las aceleraciones y frenadas (bloques/tick por tick). */

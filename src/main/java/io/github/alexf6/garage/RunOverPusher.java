@@ -1,5 +1,6 @@
 package io.github.alexf6.garage;
 
+import io.github.alexf6.garage.physics.RunOverMath;
 import io.github.alexf6.garage.physics.VehicleMath;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -28,16 +29,17 @@ final class RunOverPusher {
         lastPos = pos;
 
         GarageConfig.RunOver config = GarageConfig.get().runOver();
-        double maxSpeed = vehicle.tuning().maxSpeed();
+        if (!config.enabled()) return;
         double distance = motion.horizontalDistance();
-        double speed = Math.min(distance, maxSpeed);
-        if (!config.enabled() || distance <= 0.0 || speed < config.pushSpeed()) return;
+        RunOverMath.Impact impact = RunOverMath.impact(distance, vehicle.tuning().maxSpeed(), config.pushSpeed(),
+                config.damageSpeed(), config.damagePerSpeed(), config.knockback());
+        if (impact.isNone()) return;
 
         double dirX = motion.x / distance;
         double dirZ = motion.z / distance;
-        double strength = config.knockback() * VehicleMath.speedRatio(speed, maxSpeed);
-        float damage = (float) ((speed - config.damageSpeed()) * config.damagePerSpeed());
-        AABB zone = vehicle.getBoundingBox().expandTowards(dirX * speed, 0.0, dirZ * speed).inflate(0.1, 0.0, 0.1);
+        float damage = impact.damage();
+        AABB zone = vehicle.getBoundingBox()
+                .expandTowards(dirX * impact.speed(), 0.0, dirZ * impact.speed()).inflate(0.1, 0.0, 0.1);
         DamageSource source = vehicle.damageSources().source(DamageTypes.MOB_ATTACK, vehicle, driver);
 
         for (Entity entity : level.getEntities(vehicle, zone, RunOverPusher::canBeRunOver)) {
@@ -46,7 +48,7 @@ final class RunOverPusher {
             if (hurts) victim.hurtServer(level, source, damage);
             VehicleMath.Planar push = VehicleMath.pushDirection(
                     dirX, dirZ, victim.getX() - pos.x, victim.getZ() - pos.z);
-            victim.knockback(strength, -push.x(), -push.z(), source, hurts ? damage : 0.0F);
+            victim.knockback(impact.strength(), -push.x(), -push.z(), source, hurts ? damage : 0.0F);
         }
     }
 

@@ -3,6 +3,7 @@ package io.github.alexf6.garage.physics;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -44,6 +45,29 @@ class VehicleTuningTest {
                 BASE.wheelBase(), BASE.maxSteerLow(), BASE.maxSteerHigh(), BASE.steerRate(),
                 BASE.grip(), BASE.driftGrip(), BASE.driftYawBoost());
         assertEquals("accel/brake", strongEngine.firstInvalid());
+    }
+
+    @Test
+    void toArrayYFromArrayDanLaMismaCopia() {
+        for (VehicleTuning tuning : new VehicleTuning[] {VehicleTuning.WILLYS, VehicleTuning.ENDURO,
+                VehicleTuning.MOTOCARRO}) {
+            double[] values = tuning.toArray();
+            assertEquals(VehicleTuning.FIELD_COUNT, values.length);
+            assertEquals(tuning, VehicleTuning.fromArray(values));
+        }
+    }
+
+    @Test
+    void toArrayRespetaElOrdenDeDeclaracion() {
+        double[] v = VehicleTuning.WILLYS.toArray();
+        assertEquals(VehicleTuning.WILLYS.maxSpeed(), v[0]);
+        assertEquals(VehicleTuning.WILLYS.wheelBase(), v[9]);
+        assertEquals(VehicleTuning.WILLYS.driftYawBoost(), v[15]);
+    }
+
+    @Test
+    void fromArrayConLongitudIncorrectaFalla() {
+        assertThrows(IllegalArgumentException.class, () -> VehicleTuning.fromArray(new double[3]));
     }
 
     private static VehicleTuning with(double maxSpeed, double maxReverse) {
