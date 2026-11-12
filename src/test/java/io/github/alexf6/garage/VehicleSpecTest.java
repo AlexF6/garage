@@ -96,4 +96,43 @@ class VehicleSpecTest {
         assertEquals(1, spec.seats().size());
         assertThrows(UnsupportedOperationException.class, () -> spec.seats().add(Vec3.ZERO));
     }
+
+    private static VehicleSpec.Builder complete() {
+        return VehicleSpec.builder("bike")
+                .size(1.0F, 1.2F)
+                .seats(new Vec3(0, 0.6, 0))
+                .color(0xFF0000)
+                .chestRows(1)
+                .wheelRadius(0.3F)
+                .headTurnLimit(90.0F)
+                .directTurnRate(1.0F)
+                .enginePitch(0.5F, 1.5F)
+                .horn(10, null, 1.0F, 1.0F, 1.2F)
+                .tuning(TUNING);
+    }
+
+    private static final java.util.function.Supplier<VehicleTuning> TUNING = () -> VehicleTuning.WILLYS;
+
+    @Test
+    void elBuilderAsignaCadaDatoASuCampo() {
+        VehicleSpec spec = complete().leanPerSteer(0.4F).build();
+        assertEquals(new VehicleSpec("bike", 1.0F, 1.2F, List.of(new Vec3(0, 0.6, 0)), 0xFF0000, 1, 0.3F, 90.0F,
+                1.0F, 0.5F, 1.5F, 0.4F, new VehicleSpec.Horn(10, null, 1.0F, List.of(1.0F, 1.2F)), TUNING), spec);
+    }
+
+    @Test
+    void sinInclinacionElBuilderNoInclina() {
+        assertEquals(0.0F, complete().build().leanPerSteer());
+    }
+
+    @Test
+    void elBuilderFallaSiFaltaUnDatoObligatorio() {
+        assertThrows(IllegalArgumentException.class, () -> VehicleSpec.builder("x").build());
+        assertThrows(IllegalArgumentException.class, () -> complete().color(-1).build(), "sin color");
+        assertThrows(IllegalArgumentException.class, () -> complete().wheelRadius(Float.NaN).build(), "sin ruedas");
+        assertThrows(IllegalArgumentException.class, () -> complete().seats().build(), "sin asientos");
+        assertThrows(IllegalArgumentException.class, () -> complete().tuning(null).build(), "sin manejo");
+        assertThrows(IllegalArgumentException.class, () -> complete().chestRows(0).build(), "sin baúl");
+        assertThrows(IllegalArgumentException.class, () -> complete().directTurnRate(Float.NaN).build());
+    }
 }
