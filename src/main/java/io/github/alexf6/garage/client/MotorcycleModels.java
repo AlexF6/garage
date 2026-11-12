@@ -161,9 +161,7 @@ public final class MotorcycleModels {
                 .addBox(1.05F, -6.0F, -6.0F, 0.0F, 12.0F, 12.0F)
                 .addBox(-1.05F, -6.0F, -6.0F, 0.0F, 12.0F, 12.0F);
 
-        PartDefinition rearWheel = swingarm.addOrReplaceChild(REAR_WHEEL, wheelTread0, at(0.0F, 0.0F, 10.5F));
-        rearWheel.addOrReplaceChild("tread_45", wheelTread45, PartPose.rotation((float) Math.PI / 4, 0.0F, 0.0F));
-        rearWheel.addOrReplaceChild("hubs", wheelHubs, PartPose.ZERO);
+        ModelKit.addWheel(swingarm, REAR_WHEEL, at(0.0F, 0.0F, 10.5F), wheelTread0, wheelTread45, wheelHubs);
 
         // 4. Tren Delantero y Dirección con inclinación de avance (Rake de -24° = -0.42 rad)
         PartDefinition steering = chassis.addOrReplaceChild(STEERING, CubeListBuilder.create(),
@@ -202,9 +200,7 @@ public final class MotorcycleModels {
                 PartPose.rotation(-FORK_RAKE, 0.0F, 0.0F));
 
         // Rueda delantera de radios (12x12), hija de steering en (0, 12.6, 0) para girar y rodar con la horquilla
-        PartDefinition frontWheel = steering.addOrReplaceChild(FRONT_WHEEL, wheelTread0, at(0.0F, 12.6F, 0.0F));
-        frontWheel.addOrReplaceChild("tread_45", wheelTread45, PartPose.rotation((float) Math.PI / 4, 0.0F, 0.0F));
-        frontWheel.addOrReplaceChild("hubs", wheelHubs, PartPose.ZERO);
+        ModelKit.addWheel(steering, FRONT_WHEEL, at(0.0F, 12.6F, 0.0F), wheelTread0, wheelTread45, wheelHubs);
 
         return LayerDefinition.create(mesh, 256, 256);
     }

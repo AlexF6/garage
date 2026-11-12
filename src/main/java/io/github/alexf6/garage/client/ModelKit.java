@@ -5,6 +5,7 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 import net.minecraft.resources.Identifier;
 
@@ -76,6 +77,18 @@ final class ModelKit {
     /** Desplazamiento vertical de la suspensión (rebote) en píxeles del modelo; positivo hacia abajo. */
     static float heavePx(float bodyHeave) {
         return -bodyHeave * PIXELS_PER_BLOCK;
+    }
+
+    /**
+     * Añade a {@code parent} una rueda de radios: la banda de rodadura recta, otra girada 45° (para que parezca
+     * redonda con cubos) y los bujes.
+     */
+    static PartDefinition addWheel(PartDefinition parent, String name, PartPose pose, CubeListBuilder tread0,
+                                   CubeListBuilder tread45, CubeListBuilder hubs) {
+        PartDefinition wheel = parent.addOrReplaceChild(name, tread0, pose);
+        wheel.addOrReplaceChild("tread_45", tread45, PartPose.rotation((float) Math.PI / 4, 0.0F, 0.0F));
+        wheel.addOrReplaceChild("hubs", hubs, PartPose.ZERO);
+        return wheel;
     }
 
     private ModelKit() {}

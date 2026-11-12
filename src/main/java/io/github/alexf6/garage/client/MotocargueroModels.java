@@ -235,18 +235,12 @@ public final class MotocargueroModels {
                 .addBox(-2.05F, -6.0F, -6.0F, 0.0F, 12.0F, 12.0F);
 
         // Rueda delantera: montada bajo steering para girar con el manillar
-        PartDefinition frontWheel = steering.addOrReplaceChild(FRONT_WHEEL, wheelTread0, at(0.0F, 11.5F, 0.0F));
-        frontWheel.addOrReplaceChild("tread_45", wheelTread45, PartPose.rotation((float) Math.PI / 4, 0.0F, 0.0F));
-        frontWheel.addOrReplaceChild("hubs", wheelHubs, PartPose.ZERO);
+        ModelKit.addWheel(steering, FRONT_WHEEL, at(0.0F, 11.5F, 0.0F), wheelTread0, wheelTread45, wheelHubs);
 
         // Ruedas traseras gemelas: apoyadas en el suelo (y = 18 px respecto a root, radio 6 px -> base en y = 24)
-        PartDefinition wheelBL = root.addOrReplaceChild(REAR_WHEELS[0], wheelTread0, at(12.25F, 18.0F, 15.0F));
-        wheelBL.addOrReplaceChild("tread_45", wheelTread45, PartPose.rotation((float) Math.PI / 4, 0.0F, 0.0F));
-        wheelBL.addOrReplaceChild("hubs", wheelHubs, PartPose.ZERO);
+        ModelKit.addWheel(root, REAR_WHEELS[0], at(12.25F, 18.0F, 15.0F), wheelTread0, wheelTread45, wheelHubs);
 
-        PartDefinition wheelBR = root.addOrReplaceChild(REAR_WHEELS[1], wheelTread0, at(-12.25F, 18.0F, 15.0F));
-        wheelBR.addOrReplaceChild("tread_45", wheelTread45, PartPose.rotation((float) Math.PI / 4, 0.0F, 0.0F));
-        wheelBR.addOrReplaceChild("hubs", wheelHubs, PartPose.ZERO);
+        ModelKit.addWheel(root, REAR_WHEELS[1], at(-12.25F, 18.0F, 15.0F), wheelTread0, wheelTread45, wheelHubs);
 
         return LayerDefinition.create(mesh, 256, 256);
     }
