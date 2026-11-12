@@ -18,7 +18,8 @@ public final class VehicleSpecs {
             GarageConfig::carTuning);
 
     public static final VehicleSpec MOTORCYCLE = new VehicleSpec("motorcycle", 0.85F, 1.25F,
-            List.of(new Vec3(0.0, 0.62, -0.05), new Vec3(0.0, 0.72, -0.52)),
+            // El sillín del modelo va de z = +0.09 (conductor) a -0.59 (pasajero); se sientan en su mitad trasera
+            List.of(new Vec3(0.0, 0.62, -0.2), new Vec3(0.0, 0.72, -0.55)),
             0x1846C7, // azul Yamaha Racing Blue
             1, // alforja de 9 casillas
             0.35F, 85.0F, 2.8F, 0.7F, 1.7F, 0.48F,
