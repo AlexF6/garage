@@ -33,7 +33,7 @@ public abstract class ChestVehicleEntity extends VehicleEntity implements Contai
     private ResourceKey<LootTable> lootTable;
     private long lootTableSeed;
 
-    /** @param containerRows filas de 9 casillas (1 a 3); se pasa por constructor porque el de {@link Entity} ya pide el tamaño */
+    /** @param containerRows filas de 9 casillas (1 a 6); se pasa por constructor porque el de {@link Entity} ya pide el tamaño */
     protected ChestVehicleEntity(EntityType<? extends ChestVehicleEntity> type, Level level, int containerRows) {
         super(type, level);
         this.containerRows = containerRows;

@@ -9,5 +9,6 @@
 	"entity.garage.motocarguero": "Cargo Trike",
 	"key.garage.horn": "Horn",
 	"key.category.garage.main": "Garage",
-	"message.garage.fuel": "Fuel: %s%%"
+	"message.garage.fuel": "Fuel: %s%%",
+	"modmenu.descriptionTranslation.garage": "Vehicles for Minecraft: a Willys Jeep, a Yamaha XTZ 125 enduro bike, a Bajaj RE auto rickshaw and a 200cc cargo trike, with fuel, storage, dyeable bodies and a horn."
 }

@@ -103,13 +103,13 @@ movimiento observado, así que se ven igual para todos sin paquetes extra.
 | Clase | Responsabilidad |
 |---|---|
 | `MotorVehicleEntity` | Entidad única de todos los vehículos: estado, combustible, asientos e interacciones. Lo que cambia de uno a otro lo dicta su `VehicleSpec` |
-| `ChestVehicleEntity` | Base con el baúl de 1 a 3 filas: guardado, menú, botín y vaciado al destruirse |
+| `ChestVehicleEntity` | Base con el baúl de 1 a 6 filas: guardado, menú, botín y vaciado al destruirse |
 | `VehicleSpec`, `VehicleSpecs` | Datos de cada vehículo (tamaño, asientos, color, baúl, ruedas, tonos, bocina, inclinación, manejo) y catálogo `ALL` |
 | `ModVehicles`, `VehicleItem` | Registro de la entidad y el ítem de cada `VehicleSpec` (desde `onInitialize`) e ítem que lo pone conservando color y nombre |
 | `RunOverPusher`, `DismountLocator` | Atropello y empuje de criaturas (servidor, con la velocidad acotada) y punto por donde baja cada pasajero |
 | `physics/VehiclePhysics` | Funciones puras del manejo: velocidad, volante, giro tipo bicicleta y derrape |
 | `physics/VehicleMath` | Funciones puras de la entidad: rumbo, giro directo, salida, empuje, rodado, dirección visual y combustible |
-| `physics/VehicleTuning`, `VehicleInput` | Parámetros de un vehículo (`WILLYS`, `ENDURO`, `MOTOCARRO`) con sus límites, y entrada inmutable del conductor |
+| `physics/VehicleTuning`, `VehicleInput` | Parámetros de un vehículo (`WILLYS`, `ENDURO`, `MOTOCARRO`, `MOTOCARGUERO`) con sus límites, y entrada inmutable del conductor |
 | `physics/Suspension` | Resortes del cabeceo, el balanceo y el rebote (solo visual) |
 | `GarageConfig` | Lee, completa, valida y respalda `config/garage.json` |
 | `HornPayload`, `TuningSyncPayload` | Paquetes: bocina (cliente → servidor) y manejo de cada vehículo (servidor → cliente, al conectar) |

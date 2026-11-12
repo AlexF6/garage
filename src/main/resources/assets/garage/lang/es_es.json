@@ -9,5 +9,6 @@
 	"entity.garage.motocarguero": "Motocarguero",
 	"key.garage.horn": "Bocina",
 	"key.category.garage.main": "Garage",
-	"message.garage.fuel": "Combustible: %s%%"
+	"message.garage.fuel": "Combustible: %s%%",
+	"modmenu.descriptionTranslation.garage": "Vehículos para Minecraft: un Jeep Willys, una moto Enduro Yamaha XTZ 125, un motocarro Bajaj RE y un motocarguero de 200cc, con combustible, baúl, colores y bocina."
 }

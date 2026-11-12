@@ -8,8 +8,17 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 ### Added
 - Motocarguero (trimoto de carga 200cc): 1 asiento con respaldo, platón de carga de 54 casillas (cofre de 6 filas), carenado y tanque teñibles (blanco glaciar por defecto), mampara con rejilla, barandas y compuerta, manejo `VehicleTuning.MOTOCARGUERO` (~47 km/h), receta y traducciones.
 - Los baúles admiten de 1 a 6 filas (antes, hasta 3).
+- `VehicleResourcesTest` y `ClientVehiclesTest` comprueban que cada vehículo de `VehicleSpecs.ALL` tenga traducciones, ítem, modelo, textura, receta y modelo de cliente: lo que falte ya no se descubre jugando.
+- Motocarro urbano (Bajaj RE / "Torito") de 3 asientos (1 conductor + 2 pasajeros): configuración Delta de 3 ruedas, baúl de 18 casillas, carrocería teñible con tintes vanilla (blanco glaciar por defecto), lona de techo negra y receta de crafteo.
+- Física y cinemática del motocarro: balanceo centrífugo (*body roll*) hacia el exterior de las curvas, radio de giro cerrado, suspensión reactiva, vibración en ralentí con el motor encendido y bocina aguda.
+- Modelo nativo del motocarro en dos capas (`BODY` tintable y `TRIM` fija) con lienzo UV 256x256 (`MotocarroModels`).
+- Moto Enduro (Yamaha XTZ 125) de 2 asientos en tándem: tuning ágil `VehicleTuning.ENDURO`, inclinación lateral dinámica (*lean angle*) al doblar en curvas, alforja de 9 casillas, color teñible con tintes (azul Yamaha Racing Blue por defecto) y receta de crafteo.
+- Modelo 3D y renderizador nativo (`MotorcycleModels`) en dos capas con horquilla inclinada (*rake* -24°), ruedas de radios (rin 21" / 18") y vibración en ralentí.
+- Base común (`MotorVehicleEntity`, `VehicleItem`, `EngineSound`) para compartir colisiones, inventario, combustible, atropellos (`runOver`) y sonido de motor parametrizado entre todos los vehículos.
 
 ### Changed
+- La descripción del mod en `fabric.mod.json` pasa a inglés y su traducción (`modmenu.descriptionTranslation.garage`) vive en los tres archivos de idioma.
+- `RunOverRules` (en `physics/`) agrupa la sección `runOver` de la config; `ModelKit.IdleVibration` comparte el ralentí de los modelos; `DismountLocator` ya no cambia la postura del pasajero por su cuenta.
 - Un solo `MotorVehicleEntity` para todos los vehículos, descrito por un `VehicleSpec` (`VehicleSpecs`): añadir uno ya no obliga a tocar el registro, el ítem ni el arranque del cliente. `MotorcycleEntity` y `MotocarroEntity` desaparecen; los identificadores de entidad, ítem y config no cambian, así que las partidas guardadas siguen funcionando.
 - Un solo `VehicleRenderer` (con `ClientVehicles`) en lugar de tres renderers casi idénticos; los modelos comparten atajos en `ModelKit`.
 - Los vehículos se declaran con `VehicleSpec.builder`, que nombra cada dato en lugar de un constructor de 14 números seguidos.
@@ -23,6 +32,8 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 - El tope de velocidad del atropello vive en `RunOverMath`, probado, y `VehicleTuning` se serializa con `toArray`/`fromArray`.
 
 ### Fixed
+- Un valor `null` en una clave simple de `garage.json` (`"maxFuel": null`) conserva el valor por defecto en vez de leerse como 0.
+- `VehicleSpec.Horn` rechaza al crearse una bocina sin sonido o con volumen no positivo, en vez de fallar en el primer bocinazo.
 - Los jugadores de la moto se sientan sobre el sillín: el anclaje estaba 0.4 bloques por debajo y quedaban hundidos en el motor.
 - Un `garage.json` con bytes que no son UTF-8 se trata como corrupto (`.bak` y regeneración), y la config se escribe de forma atómica.
 - El servidor decide si el tanque está lleno al repostar; el cliente ya no lo adivina con su config local.
@@ -37,14 +48,6 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 - Cada vehículo suelta su propio ítem (`getDropItem` ya no cae por defecto en el Jeep).
 - Un vehículo aparcado (sin conductor, en el suelo y quieto) solo recalcula su física cada 10 ticks, que basta para detectar que le quitaron el suelo.
 - El servidor ya no calcula animaciones (ruedas, dirección, inclinación) que solo se ven en el cliente.
-
-### Added
-- Motocarro urbano (Bajaj RE / "Torito") de 3 asientos (1 conductor + 2 pasajeros): configuración Delta de 3 ruedas, baúl de 18 casillas, carrocería teñible con tintes vanilla (blanco glaciar por defecto), lona de techo negra y receta de crafteo.
-- Física y cinemática del motocarro: balanceo centrífugo (*body roll*) hacia el exterior de las curvas, radio de giro cerrado, suspensión reactiva, vibración en ralentí con el motor encendido y bocina aguda.
-- Modelo nativo del motocarro en dos capas (`BODY` tintable y `TRIM` fija) con lienzo UV 256x256 (`MotocarroModels`).
-- Moto Enduro (Yamaha XTZ 125) de 2 asientos en tándem: tuning ágil `VehicleTuning.ENDURO`, inclinación lateral dinámica (*lean angle*) al doblar en curvas, alforja de 9 casillas, color teñible con tintes (azul Yamaha Racing Blue por defecto) y receta de crafteo.
-- Modelo 3D y renderizador nativo (`MotorcycleModels`) en dos capas con horquilla inclinada (*rake* -24°), ruedas de radios (rin 21" / 18") y vibración en ralentí.
-- Base común (`MotorVehicleEntity`, `VehicleItem`, `EngineSound`) para compartir colisiones, inventario, combustible, atropellos (`runOver`) y sonido de motor parametrizado entre todos los vehículos.
 
 ## [1.0.0] - 2026-11-10
 
