@@ -63,18 +63,38 @@ public record VehicleTuning(
             0.22, 0.90, 1.7
     );
 
-    /** Primer parámetro fuera de rango, o {@code null} si todos son válidos. */
+    /** Tope de velocidad (bloques/tick; 3 = 216 km/h): más rápido el vehículo se sale de los chunks cargados. */
+    public static final double SPEED_LIMIT = 3.0;
+    /** Tope de las aceleraciones y frenadas (bloques/tick por tick). */
+    public static final double ACCEL_LIMIT = 1.0;
+    /** Tope de la distancia entre ejes (bloques). */
+    public static final double WHEEL_BASE_LIMIT = 16.0;
+    /** Tope del ritmo del volante (radianes/tick) y del impulso de giro al derrapar. */
+    public static final double STEER_RATE_LIMIT = 1.0;
+    public static final double DRIFT_YAW_BOOST_LIMIT = 10.0;
+
+    /** Primer parámetro fuera de rango, o {@code null} si todos son válidos (NaN cuenta como inválido). */
     public String firstInvalid() {
-        if (!(maxSpeed > 0) || !(maxReverse > 0)) return "maxSpeed/maxReverse";
-        if (!(accel > 0) || !(reverseAccel > 0) || brake < 0 || handbrake < 0) return "accel/brake";
+        if (!inRange(maxSpeed, SPEED_LIMIT) || !inRange(maxReverse, SPEED_LIMIT)) return "maxSpeed/maxReverse";
+        if (!inRange(accel, ACCEL_LIMIT) || !inRange(reverseAccel, ACCEL_LIMIT)
+                || !(brake >= 0 && brake <= ACCEL_LIMIT) || !(handbrake >= 0 && handbrake <= ACCEL_LIMIT)) {
+            return "accel/brake";
+        }
         if (!isFactor(rollingFriction) || !isFactor(airDrag) || !isFactor(waterDrag)) return "friction";
-        if (!(wheelBase > 0)) return "wheelBase";
-        if (maxSteerLow < 0 || maxSteerHigh < 0 || maxSteerLow >= Math.PI / 2 || maxSteerHigh >= Math.PI / 2) {
+        if (!inRange(wheelBase, WHEEL_BASE_LIMIT)) return "wheelBase";
+        if (!(maxSteerLow >= 0 && maxSteerLow < Math.PI / 2) || !(maxSteerHigh >= 0 && maxSteerHigh < Math.PI / 2)) {
             return "maxSteer";
         }
-        if (!(steerRate > 0)) return "steerRate";
-        if (!isFactor(grip) || !isFactor(driftGrip) || !(driftYawBoost > 0)) return "grip/drift";
+        if (!inRange(steerRate, STEER_RATE_LIMIT)) return "steerRate";
+        if (!isFactor(grip) || !isFactor(driftGrip) || !inRange(driftYawBoost, DRIFT_YAW_BOOST_LIMIT)) {
+            return "grip/drift";
+        }
         return null;
+    }
+
+    /** Positivo y no mayor que {@code limit}; falso con NaN. */
+    private static boolean inRange(double value, double limit) {
+        return value > 0 && value <= limit;
     }
 
     private static boolean isFactor(double value) {

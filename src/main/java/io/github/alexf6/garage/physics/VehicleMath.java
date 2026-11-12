@@ -96,5 +96,11 @@ public final class VehicleMath {
         return Math.min(Math.abs(speed) / maxSpeed, 1.0);
     }
 
+    /** Porcentaje de combustible, en [0, 100], sin desbordar {@code int} con tanques enormes. */
+    public static int fuelPercent(int fuel, int maxFuel) {
+        if (maxFuel <= 0) return 0;
+        return (int) Math.clamp((long) fuel * 100L / maxFuel, 0L, 100L);
+    }
+
     private VehicleMath() {}
 }

@@ -112,4 +112,15 @@ class VehicleMathTest {
         assertEquals(0.5, VehicleMath.speedRatio(-0.3, 0.6), EPS);
         assertEquals(1.0, VehicleMath.speedRatio(5.0, 0.6), EPS);
     }
+
+    @Test
+    void fuelPercentNoDesbordaConTanquesEnormes() {
+        assertEquals(0, VehicleMath.fuelPercent(0, 12000));
+        assertEquals(50, VehicleMath.fuelPercent(6000, 12000));
+        assertEquals(100, VehicleMath.fuelPercent(12000, 12000));
+        assertEquals(100, VehicleMath.fuelPercent(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        assertEquals(49, VehicleMath.fuelPercent(Integer.MAX_VALUE / 2, Integer.MAX_VALUE), "trunca hacia abajo");
+        assertEquals(0, VehicleMath.fuelPercent(-5, 100));
+        assertEquals(0, VehicleMath.fuelPercent(10, 0), "tanque sin capacidad: no divide entre cero");
+    }
 }

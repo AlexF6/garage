@@ -277,7 +277,7 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
         }
 
         // Solo manda paquete si cambia el porcentaje o antes de que se borre la action bar
-        int percent = getFuel() * 100 / GarageConfig.get().maxFuel();
+        int percent = VehicleMath.fuelPercent(getFuel(), GarageConfig.get().maxFuel());
         if (percent != lastFuelPercent || this.tickCount % FUEL_HUD_INTERVAL == 0) {
             lastFuelPercent = percent;
             player.sendSystemMessage(Component.translatable("message.garage.fuel", percent), true);
