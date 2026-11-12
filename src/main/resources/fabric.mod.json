@@ -3,7 +3,7 @@
 	"id": "garage",
 	"version": "${version}",
 	"name": "Garage",
-	"description": "Vehículos para Minecraft. Incluye un Jeep Willys \"Yipao\" de 4 asientos, una moto Enduro (Yamaha XTZ 125) de 2 asientos y un motocarro (Bajaj RE / \"Torito\") de 3 asientos, con combustible, baúl, colores y bocina.",
+	"description": "Vehículos para Minecraft. Incluye un Jeep Willys \"Yipao\" de 4 asientos, una moto Enduro (Yamaha XTZ 125) de 2 asientos, un motocarro (Bajaj RE / \"Torito\") de 3 asientos y un motocarguero (trimoto de carga 200cc) con platón de 54 casillas, con combustible, baúl, colores y bocina.",
 	"authors": [
 		"AlexF6"
 	],

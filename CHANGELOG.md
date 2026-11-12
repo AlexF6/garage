@@ -5,6 +5,10 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 
 ## [Unreleased]
 
+### Added
+- Motocarguero (trimoto de carga 200cc): 1 asiento con respaldo, platón de carga de 54 casillas (cofre de 6 filas), carenado y tanque teñibles (blanco glaciar por defecto), mampara con rejilla, barandas y compuerta, manejo `VehicleTuning.MOTOCARGUERO` (~47 km/h), receta y traducciones.
+- Los baúles admiten de 1 a 6 filas (antes, hasta 3).
+
 ### Changed
 - Un solo `MotorVehicleEntity` para todos los vehículos, descrito por un `VehicleSpec` (`VehicleSpecs`): añadir uno ya no obliga a tocar el registro, el ítem ni el arranque del cliente. `MotorcycleEntity` y `MotocarroEntity` desaparecen; los identificadores de entidad, ítem y config no cambian, así que las partidas guardadas siguen funcionando.
 - Un solo `VehicleRenderer` (con `ClientVehicles`) en lugar de tres renderers casi idénticos.

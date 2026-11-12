@@ -5,6 +5,8 @@
 	"entity.garage.motorcycle": "Motocicleta",
 	"item.garage.motocarro": "Motocarro",
 	"entity.garage.motocarro": "Motocarro",
+	"item.garage.motocarguero": "Motocarguero",
+	"entity.garage.motocarguero": "Motocarguero",
 	"key.garage.horn": "Bocina",
 	"key.category.garage.main": "Garage",
 	"message.garage.fuel": "Combustible: %s%%"

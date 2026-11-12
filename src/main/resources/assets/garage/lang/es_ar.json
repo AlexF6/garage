@@ -5,6 +5,8 @@
 	"entity.garage.motorcycle": "Moto",
 	"item.garage.motocarro": "Motocarro (Torito)",
 	"entity.garage.motocarro": "Motocarro (Torito)",
+	"item.garage.motocarguero": "Motocarguero",
+	"entity.garage.motocarguero": "Motocarguero",
 	"key.garage.horn": "Bocina",
 	"key.category.garage.main": "Garage",
 	"message.garage.fuel": "Combustible: %s%%"

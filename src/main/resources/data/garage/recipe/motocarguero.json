@@ -1,0 +1,21 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "equipment",
+	"pattern": [
+		"BLC",
+		"IFI",
+		"KBK"
+	],
+	"key": {
+		"B": "minecraft:iron_bars",
+		"L": "minecraft:leather",
+		"C": "minecraft:chest",
+		"I": "minecraft:iron_ingot",
+		"F": "minecraft:furnace",
+		"K": "minecraft:black_wool"
+	},
+	"result": {
+		"id": "garage:motocarguero",
+		"count": 1
+	}
+}

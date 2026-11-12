@@ -63,6 +63,18 @@ public record VehicleTuning(
             0.22, 0.90, 1.7
     );
 
+    /** Trimoto de carga / Motocarguero 200cc: pesado con platón metálico, ~47 km/h (0.65 b/t), alto torque y tracción posterior. */
+    public static final VehicleTuning MOTOCARGUERO = new VehicleTuning(
+            0.65, 0.18,
+            0.042, 0.018,
+            0.045, 0.040,
+            0.982, 0.993, 0.75,
+            1.70,
+            0.70, 0.25,
+            0.16,
+            0.26, 0.88, 1.6
+    );
+
     /** Número de parámetros de {@link #toArray()}. */
     public static final int FIELD_COUNT = 16;
 

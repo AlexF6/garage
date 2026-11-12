@@ -35,8 +35,17 @@ public final class VehicleSpecs {
             new VehicleSpec.Horn(20, SoundEvents.NOTE_BLOCK_BELL, 1.4F, List.of(1.6F, 1.9F)),
             () -> VehicleTuning.MOTOCARRO);
 
+    public static final VehicleSpec MOTOCARGUERO = new VehicleSpec("motocarguero", 1.40F, 1.70F,
+            List.of(new Vec3(0.0, 0.90, -0.17)), // sobre el sillín (tope a 0.907, centro en z -0.17)
+            0xE8ECEF, // blanco glaciar
+            6, // platón de carga de 54 casillas (9x6)
+            0.35F, // rin de carga de 0.35
+            85.0F, 1.8F, 0.60F, 1.50F, 0.0F,
+            new VehicleSpec.Horn(20, SoundEvents.NOTE_BLOCK_BELL, 1.4F, List.of(1.3F, 1.6F)),
+            () -> VehicleTuning.MOTOCARGUERO);
+
     /** En el orden en que se registran y aparecen en la pestaña creativa. */
-    public static final List<VehicleSpec> ALL = List.of(CAR, MOTORCYCLE, MOTOCARRO);
+    public static final List<VehicleSpec> ALL = List.of(CAR, MOTORCYCLE, MOTOCARRO, MOTOCARGUERO);
 
     private VehicleSpecs() {}
 }

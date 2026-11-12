@@ -1,18 +1,19 @@
 # Garage
 
 Fabric, Minecraft 26.3, Java 25. Vehículos para Minecraft. Incluye un Jeep Willys "Yipao" cafetero de 4
-asientos, una moto Enduro (Yamaha XTZ 125) de 2 asientos y un Motocarro urbano (Bajaj RE / "Torito") de 3 asientos, con combustible, baúl, colores, bocina y física reactiva;
+asientos, una moto Enduro (Yamaha XTZ 125) de 2 asientos, un Motocarro urbano (Bajaj RE / "Torito") de 3 asientos y un
+Motocarguero (trimoto de carga 200cc) con platón, con combustible, baúl, colores, bocina y física reactiva;
 el mod está pensado para sumar más vehículos. Hay que tener el mod en cliente y servidor.
 
 ## Uso
 
 - **Poner el vehículo:** clic derecho con el ítem sobre un bloque. Queda mirando hacia donde miras.
-- **Subir:** clic derecho sobre el vehículo. El primer jugador en subir conduce (4 asientos en el carro, 2 en tándem en la moto y 3 en el motocarro).
+- **Subir:** clic derecho sobre el vehículo. El primer jugador en subir conduce (4 asientos en el carro, 2 en tándem en la moto, 3 en el motocarro y 1 en el motocarguero).
 - **Bajar:** shift. Sales por la puerta o costado de tu asiento; si ese lado está tapado, por el otro.
 - **Combustible:** clic derecho con carbón o carbón vegetal. Cada unidad da 80 s de acelerador y el tanque lleno 10 min.
   Solo se gasta mientras aceleras o retrocedes. El nivel aparece en la barra de acción mientras conduces.
 - **Color:** clic derecho con cualquier tinte.
-- **Baúl / alforja:** shift + clic derecho sobre el vehículo (27 espacios en el carro, 18 en el motocarro y 9 en la moto).
+- **Baúl / alforja:** shift + clic derecho sobre el vehículo (27 espacios en el carro, 54 en el platón del motocarguero, 18 en el motocarro y 9 en la moto).
 - **Romperlo:** golpéalo como a un bote. Suelta el ítem con su color y su nombre, y lo que haya en el baúl.
 
 ### Manejo
@@ -24,7 +25,7 @@ el mod está pensado para sumar más vehículos. Hay que tener el mod en cliente
 | Espacio | Freno de mano: frena y, en curva, derrapa |
 | H | Bocina (se puede cambiar en Controles → Garage) |
 
-- Velocidad máxima hacia adelante de unos 43 km/h en el carro (14 km/h en reversa), 68 km/h en la moto Enduro y 52 km/h en el motocarro. Todos suben bloques completos sin saltar.
+- Velocidad máxima hacia adelante de unos 43 km/h en el carro (14 km/h en reversa), 68 km/h en la moto Enduro, 52 km/h en el motocarro y 47 km/h en el motocarguero. Todos suben bloques completos sin saltar.
 - La dirección depende de la velocidad: a baja velocidad gira cerrado (radio de unos 2.5 bloques) y a alta se endurece.
   En reversa el giro se invierte, como en un carro real.
 - En el agua se hunde despacio y no tiene tracción. El carro amortigua las caídas: los pasajeros no reciben daño.
@@ -38,6 +39,7 @@ el mod está pensado para sumar más vehículos. Hay que tener el mod en cliente
 | Carro | `IGI` / `IFI` / `KKK` con lingotes de hierro (`I`), panel de vidrio (`G`), horno (`F`) y lana negra (`K`) |
 | Moto | ` H ` / `IFI` / `KWK` con barrotes de hierro (`H`), lingotes (`I`), horno (`F`), lana negra (`K`) y cuero (`W`) |
 | Motocarro | `LGL` / `IFI` / `KCK` con cuero (`L`), vidrio (`G`), lingotes (`I`), horno (`F`), lana negra (`K`) y cofre (`C`) |
+| Motocarguero | `BLC` / `IFI` / `KBK` con barrotes de hierro (`B`), cuero (`L`), cofre (`C`), lingotes (`I`), horno (`F`) y lana negra (`K`) |
 
 ## Configuración
 
@@ -49,9 +51,9 @@ archivo se reescribe. Hay que reiniciar el juego (o el servidor) para aplicar ca
 - Si el archivo no es JSON válido (o un valor tiene el tipo equivocado) se guarda como `garage.json.bak`, se crea
   uno nuevo con los valores por defecto y se avisa en el log. Si no se puede leer por permisos, se juega con los
   valores por defecto sin tocarlo.
-- Es una config **de servidor**: en multijugador manda la del servidor. El `tuning` del Jeep se envía a cada cliente al
-  conectarse y reemplaza al suyo mientras dure la conexión. La moto y el motocarro usan perfiles fijos del mod
-  (`ENDURO` y `MOTOCARRO`) y no leen `tuning`.
+- Es una config **de servidor**: en multijugador manda la del servidor. Al conectarse, el servidor envía a cada cliente
+  el manejo de todos los vehículos, que reemplaza al suyo mientras dure la conexión. La moto, el motocarro y el
+  motocarguero usan perfiles fijos del mod (`ENDURO`, `MOTOCARRO` y `MOTOCARGUERO`) y no leen `tuning`.
 
 Las velocidades van en bloques/tick (1 b/t = 72 km/h) y los factores son lo que se conserva por tick
 (1 = no frena, 0 = frena en seco).
@@ -116,6 +118,7 @@ movimiento observado, así que se ven igual para todos sin paquetes extra.
 | `client/CarModels` | Modelo del Jeep en dos capas, ruedas, suspensión y bandera |
 | `client/MotorcycleModels` | Modelo de la moto XTZ en dos capas, horquilla inclinada (rake), ruedas y tumbada (lean) |
 | `client/MotocarroModels` | Modelo del motocarro en dos capas, tren delantero Delta, suspensión y balanceo centrífugo |
+| `client/MotocargueroModels` | Modelo del motocarguero en dos capas: carenado y tanque teñibles, mampara con rejilla, platón con barandas y compuerta, y 3 ruedas |
 | `client/EngineSound` | Motor en bucle cuyo tono sube con la velocidad según el rango de cada vehículo |
 
 Para agregar otro vehículo:

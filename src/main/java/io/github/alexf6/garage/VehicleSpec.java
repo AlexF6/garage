@@ -43,7 +43,7 @@ public record VehicleSpec(
         Horn horn,
         Supplier<VehicleTuning> tuning) {
 
-    public static final int MAX_CONTAINER_ROWS = 3;
+    public static final int MAX_CONTAINER_ROWS = 6;
 
     /** Falla al crearse (es decir, al arrancar) si algún dato es imposible, en vez de dar un vehículo roto. */
     public VehicleSpec {

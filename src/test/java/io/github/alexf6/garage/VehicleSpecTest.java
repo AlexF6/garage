@@ -51,8 +51,8 @@ class VehicleSpecTest {
     }
 
     @Test
-    void lasFilasDelBaulVanDeUnoATres() {
-        for (int rows : new int[] {0, -1, 4, 100}) {
+    void lasFilasDelBaulVanDeUnoAlMaximoDeVanilla() {
+        for (int rows : new int[] {0, -1, VehicleSpec.MAX_CONTAINER_ROWS + 1, 100}) {
             assertThrows(IllegalArgumentException.class,
                     () -> spec("x", 1.0F, SEATS, 0, rows, 0.3F, 90.0F, 0.5F, 1.5F, 0.0F), "rows " + rows);
         }

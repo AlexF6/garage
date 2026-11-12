@@ -16,6 +16,7 @@ class VehicleTuningTest {
         assertNull(VehicleTuning.WILLYS.firstInvalid());
         assertNull(VehicleTuning.ENDURO.firstInvalid());
         assertNull(VehicleTuning.MOTOCARRO.firstInvalid());
+        assertNull(VehicleTuning.MOTOCARGUERO.firstInvalid());
     }
 
     @Test

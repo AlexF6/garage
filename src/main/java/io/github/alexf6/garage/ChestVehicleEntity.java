@@ -22,7 +22,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.loot.LootTable;
 
 /**
- * Vehículo con baúl de 1 a 3 filas (patrón de {@code AbstractChestBoat}). Reúne todo el contrato de
+ * Vehículo con baúl de 1 a 6 filas (patrón de {@code AbstractChestBoat}). Reúne todo el contrato de
  * {@link ContainerEntity} para que la clase del vehículo motorizado no cargue con él: guardado del contenido,
  * menú, tabla de botín y vaciado al destruirse.
  */
@@ -74,6 +74,9 @@ public abstract class ChestVehicleEntity extends VehicleEntity implements Contai
             case 1 -> MenuType.GENERIC_9x1;
             case 2 -> MenuType.GENERIC_9x2;
             case 3 -> MenuType.GENERIC_9x3;
+            case 4 -> MenuType.GENERIC_9x4;
+            case 5 -> MenuType.GENERIC_9x5;
+            case 6 -> MenuType.GENERIC_9x6;
             default -> throw new IllegalStateException("filas de baúl no soportadas: " + containerRows);
         };
         return new ChestMenu(menuType, containerId, inventory, this, containerRows);
