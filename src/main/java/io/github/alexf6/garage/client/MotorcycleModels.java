@@ -229,14 +229,10 @@ public final class MotorcycleModels {
             super(root);
             this.leanRoot = root.getChild(LEAN_ROOT);
             this.chassis = leanRoot.getChild(CHASSIS);
-            this.steering = chassis.hasChild(STEERING) ? chassis.getChild(STEERING) : null;
-            this.frontWheel = (this.steering != null && this.steering.hasChild(FRONT_WHEEL))
-                    ? this.steering.getChild(FRONT_WHEEL)
-                    : null;
-            ModelPart swingarm = chassis.hasChild(SWINGARM) ? chassis.getChild(SWINGARM) : null;
-            this.rearWheel = (swingarm != null && swingarm.hasChild(REAR_WHEEL))
-                    ? swingarm.getChild(REAR_WHEEL)
-                    : null;
+            this.steering = ModelKit.childOrNull(chassis, STEERING);
+            this.frontWheel = this.steering != null ? ModelKit.childOrNull(this.steering, FRONT_WHEEL) : null;
+            ModelPart swingarm = ModelKit.childOrNull(chassis, SWINGARM);
+            this.rearWheel = swingarm != null ? ModelKit.childOrNull(swingarm, REAR_WHEEL) : null;
         }
 
         @Override
@@ -247,7 +243,7 @@ public final class MotorcycleModels {
             this.leanRoot.zRot = state.lean;
 
             // b) Suspensión de largo recorrido (hunde la horquilla delantera al frenar) y ralentí monocilíndrico 4T
-            float heavePx = -state.bodyHeave * 16.0F;
+            float heavePx = ModelKit.heavePx(state.bodyHeave);
             if (state.isEngineRunning && state.speedRatio < IDLE_SPEED_RATIO) {
                 float idle = Mth.sin(state.ageInTicks * IDLE_SWAY_SPEED) * IDLE_SWAY_AMPLITUDE;
                 this.chassis.y = heavePx + (Mth.cos(state.ageInTicks * IDLE_BOB_SPEED) * IDLE_BOB_AMPLITUDE_PX);

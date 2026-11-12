@@ -25,6 +25,7 @@ public final class MotocarroModels {
     public static final ModelLayerLocation TRIM = layer("trim");
 
     public static final String[] WHEELS = {"wheel_front", "wheel_bl", "wheel_br"};
+    private static final int FRONT_WHEELS = 1; // las primeras de WHEELS: la delantera gira con el manillar
     private static final String CHASSIS = "chassis";
     private static final String STEERING = "steering";
 
@@ -160,15 +161,13 @@ public final class MotocarroModels {
     public static final class Part extends EntityModel<VehicleRenderState> {
         private final ModelPart chassis;
         private final ModelPart steering;
-        private final ModelPart[] wheels = new ModelPart[WHEELS.length];
+        private final ModelPart[] wheels;
 
         public Part(ModelPart root) {
             super(root);
             this.chassis = root.getChild(CHASSIS);
-            this.steering = chassis.hasChild(STEERING) ? chassis.getChild(STEERING) : null;
-            for (int i = 0; i < WHEELS.length; i++) {
-                this.wheels[i] = root.hasChild(WHEELS[i]) ? root.getChild(WHEELS[i]) : null;
-            }
+            this.steering = ModelKit.childOrNull(chassis, STEERING);
+            this.wheels = ModelKit.wheels(root, WHEELS);
         }
 
         @Override
@@ -176,11 +175,7 @@ public final class MotocarroModels {
             super.setupAnim(state);
 
             // Ruedas en el suelo: las 3 ruedan y la delantera (índice 0) gira con el manillar
-            for (int i = 0; i < wheels.length; i++) {
-                if (wheels[i] == null) continue;
-                wheels[i].xRot = state.wheelRoll;
-                wheels[i].yRot = i == 0 ? state.steer : 0.0F;
-            }
+            ModelKit.spinWheels(wheels, state.wheelRoll, state.steer, FRONT_WHEELS);
 
             // Dirección del manillar y guardabarros delantero
             if (this.steering != null) {
@@ -188,7 +183,7 @@ public final class MotocarroModels {
             }
 
             // Suspensión, ralentí (solo con motor encendido) y balanceo centrífugo hacia el exterior de la curva
-            float heavePx = -state.bodyHeave * 16.0F;
+            float heavePx = ModelKit.heavePx(state.bodyHeave);
             if (state.isEngineRunning && state.speedRatio < IDLE_SPEED_RATIO) {
                 float idleBuzz = (float) Math.sin(state.ageInTicks * IDLE_BUZZ_SPEED) * IDLE_BUZZ_AMPLITUDE;
                 this.chassis.y = 24.0F + heavePx + ((float) Math.cos(state.ageInTicks * IDLE_BOB_SPEED) * IDLE_BOB_AMPLITUDE_PX);

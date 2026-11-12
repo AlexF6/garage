@@ -25,6 +25,7 @@ public final class CarModels {
     public static final ModelLayerLocation TRIM = layer("trim");
 
     public static final String[] WHEELS = {"wheel_fl", "wheel_fr", "wheel_bl", "wheel_br"};
+    private static final int FRONT_WHEELS = 2; // las primeras de WHEELS
     /** Todo lo que no son ruedas cuelga de aquí (pivote en el suelo) para que la suspensión no mueva las ruedas. */
     private static final String CHASSIS = "chassis";
     private static final String FLAG = "flag_cloth";
@@ -142,15 +143,13 @@ public final class CarModels {
 
         private final ModelPart chassis;
         private final ModelPart flag;
-        private final ModelPart[] wheels = new ModelPart[4];
+        private final ModelPart[] wheels;
 
         public Part(ModelPart root) {
             super(root);
             this.chassis = root.getChild(CHASSIS);
-            this.flag = chassis.hasChild(FLAG) ? chassis.getChild(FLAG) : null;
-            for (int i = 0; i < wheels.length; i++) {
-                wheels[i] = root.hasChild(WHEELS[i]) ? root.getChild(WHEELS[i]) : null;
-            }
+            this.flag = ModelKit.childOrNull(chassis, FLAG);
+            this.wheels = ModelKit.wheels(root, WHEELS);
         }
 
         @Override
@@ -158,18 +157,14 @@ public final class CarModels {
             super.setupAnim(state);
             chassis.xRot = state.bodyPitch;
             chassis.zRot = state.bodyRoll;
-            chassis.y -= state.bodyHeave * 16.0F; // bloques → píxeles; el eje Y del modelo apunta hacia abajo
+            chassis.y -= state.bodyHeave * ModelKit.PIXELS_PER_BLOCK;
 
             if (flag != null) {
                 float swing = Mth.lerp(state.speedRatio, FLAG_SWING_IDLE, FLAG_SWING_FAST);
                 flag.yRot = Mth.sin(state.ageInTicks * FLAG_SPEED) * swing;
             }
 
-            for (int i = 0; i < wheels.length; i++) {
-                if (wheels[i] == null) continue;
-                wheels[i].xRot = state.wheelRoll;
-                wheels[i].yRot = i < 2 ? state.steer : 0.0F; // solo las delanteras giran
-            }
+            ModelKit.spinWheels(wheels, state.wheelRoll, state.steer, FRONT_WHEELS); // solo las delanteras giran
         }
     }
 
