@@ -45,6 +45,11 @@ public final class ModVehicles {
                 .register(tab -> VehicleSpecs.ALL.forEach(spec -> tab.accept(item(spec))));
     }
 
+    /** Si {@link #register()} ya se ejecutó en esta JVM. */
+    public static boolean isRegistered() {
+        return !registered.isEmpty();
+    }
+
     public static EntityType<MotorVehicleEntity> entityType(VehicleSpec spec) {
         return lookup(spec).entityType();
     }

@@ -1,6 +1,7 @@
 package io.github.alexf6.garage;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import net.minecraft.SharedConstants;
@@ -18,6 +19,7 @@ class ModVehiclesTest {
 
     @Test
     void consultarUnVehiculoAntesDeRegistrarDaUnMensajeClaro() {
+        assumeFalse(ModVehicles.isRegistered(), "otra prueba ya registró los vehículos en esta JVM");
         IllegalStateException e = assertThrows(IllegalStateException.class, () -> ModVehicles.item(VehicleSpecs.CAR));
         assertTrue(e.getMessage().contains("car"), e.getMessage());
         assertTrue(e.getMessage().contains("register()"), e.getMessage());
