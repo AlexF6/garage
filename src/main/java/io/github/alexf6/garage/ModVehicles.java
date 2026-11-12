@@ -32,6 +32,9 @@ public final class ModVehicles {
     public static void register() {
         Map<String, Registered> result = new LinkedHashMap<>();
         for (VehicleSpec spec : VehicleSpecs.ALL) {
+            if (result.containsKey(spec.id())) {
+                throw new IllegalStateException("VehicleSpecs.ALL repite el id " + spec.id());
+            }
             EntityType<MotorVehicleEntity> entityType = registerEntity(spec);
             result.put(spec.id(), new Registered(entityType, registerItem(spec, entityType)));
         }

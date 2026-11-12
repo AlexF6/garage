@@ -33,7 +33,7 @@ public abstract class ChestVehicleEntity extends VehicleEntity implements Contai
     private ResourceKey<LootTable> lootTable;
     private long lootTableSeed;
 
-    /** @param containerRows filas de 9 casillas; se pasa por constructor porque el de {@link Entity} ya pide el tamaño */
+    /** @param containerRows filas de 9 casillas (1 a 3); se pasa por constructor porque el de {@link Entity} ya pide el tamaño */
     protected ChestVehicleEntity(EntityType<? extends ChestVehicleEntity> type, Level level, int containerRows) {
         super(type, level);
         this.containerRows = containerRows;
@@ -70,13 +70,13 @@ public abstract class ChestVehicleEntity extends VehicleEntity implements Contai
     public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
         if (player.isSpectator()) return null;
         unpackChestVehicleLootTable(inventory.player);
-        int rows = containerRows;
-        MenuType<ChestMenu> menuType = switch (rows) {
+        MenuType<ChestMenu> menuType = switch (containerRows) {
             case 1 -> MenuType.GENERIC_9x1;
             case 2 -> MenuType.GENERIC_9x2;
-            default -> MenuType.GENERIC_9x3;
+            case 3 -> MenuType.GENERIC_9x3;
+            default -> throw new IllegalStateException("filas de baúl no soportadas: " + containerRows);
         };
-        return new ChestMenu(menuType, containerId, inventory, this, rows);
+        return new ChestMenu(menuType, containerId, inventory, this, containerRows);
     }
 
     @Override
