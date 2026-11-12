@@ -3,7 +3,9 @@ package io.github.alexf6.garage.client;
 import io.github.alexf6.garage.MotorVehicleEntity;
 import io.github.alexf6.garage.GarageMod;
 import io.github.alexf6.garage.HornPayload;
+import io.github.alexf6.garage.GarageConfig;
 import io.github.alexf6.garage.ModVehicles;
+import io.github.alexf6.garage.TuningSyncPayload;
 import io.github.alexf6.garage.VehicleSpec;
 import io.github.alexf6.garage.VehicleSpecs;
 import io.github.alexf6.garage.physics.VehicleInput;
@@ -11,6 +13,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.renderer.entity.EntityRenderers;
@@ -37,6 +40,17 @@ public class GarageClient implements ClientModInitializer {
             EntityRenderers.register(ModVehicles.entityType(spec),
                     context -> new VehicleRenderer(context, model.look()));
         }
+
+        // El manejo del Jeep lo manda el servidor al entrar y se descarta al salir
+        ClientPlayNetworking.registerGlobalReceiver(TuningSyncPayload.TYPE, (payload, context) -> {
+            String invalid = payload.tuning().firstInvalid();
+            if (invalid == null) {
+                GarageConfig.setSyncedTuning(payload.tuning());
+            } else {
+                GarageMod.LOGGER.warn("El servidor mandó un tuning inválido ({}); se usa el local", invalid);
+            }
+        });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> GarageConfig.clearSyncedTuning());
 
         // Un sonido de motor por vehículo cargado; se detiene solo cuando el vehículo desaparece
         ClientEntityEvents.ENTITY_LOAD.register((entity, level) -> {

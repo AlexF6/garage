@@ -13,6 +13,10 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Aparta (y desde cierta velocidad lastima) a las criaturas que el vehículo tiene delante. Va en el servidor
  * porque el daño lo decide él; sin esto el vehículo choca contra ellas como contra una pared.
+ *
+ * <p>La velocidad sale de cuánto se movió el vehículo entre dos ticks, y esa posición la manda el cliente del
+ * conductor: se acota a la velocidad máxima del {@code tuning} del servidor para que un cliente alterado no
+ * consiga daño, empuje ni zonas de búsqueda mayores de lo que permite el manejo. Coste: O(entidades en la zona).
  */
 final class RunOverPusher {
 
@@ -24,14 +28,16 @@ final class RunOverPusher {
         lastPos = pos;
 
         GarageConfig.RunOver config = GarageConfig.get().runOver();
-        double speed = motion.horizontalDistance();
-        if (!config.enabled() || speed < config.pushSpeed()) return;
+        double maxSpeed = vehicle.tuning().maxSpeed();
+        double distance = motion.horizontalDistance();
+        double speed = Math.min(distance, maxSpeed);
+        if (!config.enabled() || distance <= 0.0 || speed < config.pushSpeed()) return;
 
-        double dirX = motion.x / speed;
-        double dirZ = motion.z / speed;
-        double strength = config.knockback() * VehicleMath.speedRatio(speed, vehicle.tuning().maxSpeed());
+        double dirX = motion.x / distance;
+        double dirZ = motion.z / distance;
+        double strength = config.knockback() * VehicleMath.speedRatio(speed, maxSpeed);
         float damage = (float) ((speed - config.damageSpeed()) * config.damagePerSpeed());
-        AABB zone = vehicle.getBoundingBox().expandTowards(motion.x, 0.0, motion.z).inflate(0.1, 0.0, 0.1);
+        AABB zone = vehicle.getBoundingBox().expandTowards(dirX * speed, 0.0, dirZ * speed).inflate(0.1, 0.0, 0.1);
         DamageSource source = vehicle.damageSources().source(DamageTypes.MOB_ATTACK, vehicle, driver);
 
         for (Entity entity : level.getEntities(vehicle, zone, RunOverPusher::canBeRunOver)) {

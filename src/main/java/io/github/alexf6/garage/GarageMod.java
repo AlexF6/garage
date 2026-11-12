@@ -2,6 +2,7 @@ package io.github.alexf6.garage;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
@@ -17,6 +18,13 @@ public class GarageMod implements ModInitializer {
         ModVehicles.register();
 
         PayloadTypeRegistry.serverboundPlay().register(HornPayload.TYPE, HornPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(TuningSyncPayload.TYPE, TuningSyncPayload.CODEC);
+        // El manejo del Jeep lo dicta el servidor: cada cliente lo recibe al entrar
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            if (ServerPlayNetworking.canSend(handler.getPlayer(), TuningSyncPayload.TYPE)) {
+                ServerPlayNetworking.send(handler.getPlayer(), new TuningSyncPayload(GarageConfig.get().tuning()));
+            }
+        });
         ServerPlayNetworking.registerGlobalReceiver(HornPayload.TYPE, (payload, context) -> {
             if (context.player().getVehicle() instanceof MotorVehicleEntity car) {
                 car.honk(context.player());

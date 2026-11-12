@@ -23,8 +23,8 @@ import java.util.Map;
  * <p>Los valores fuera de rango se corrigen al límite y se avisan en el log. Un archivo ilegible como JSON se
  * guarda como {@code garage.json.bak} y se regenera con los valores por defecto.
  *
- * <p>En multijugador la física la calcula el cliente del conductor con <em>su</em> {@code tuning}; el combustible y
- * los atropellos los decide el servidor con el suyo. Las motos usan perfiles fijos del mod.
+ * <p>En multijugador el {@code tuning} del Jeep lo manda el servidor al conectar ({@link TuningSyncPayload}) y
+ * el cliente lo usa en lugar del suyo mientras dure la conexión; las motos usan perfiles fijos del mod.
  *
  * @param maxFuel      ticks de acelerador con el tanque lleno, de 1 a {@value #MAX_FUEL_LIMIT}
  * @param fuelPerItem  ticks que suma cada unidad de combustible, de 0 a {@code maxFuel}
@@ -58,16 +58,28 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    // Se escribe una sola vez al arrancar (load); el resto del tiempo solo se lee
+    // Se escriben una sola vez al arrancar (load) y al conectar (sincronización); el resto del tiempo solo se leen
     private static volatile GarageConfig current = DEFAULT;
+    private static volatile VehicleTuning syncedTuning;
 
     public static GarageConfig get() {
         return current;
     }
 
-    /** Manejo del Jeep, el de la config local. */
+    /** Manejo del Jeep: el que mandó el servidor si hay conexión, y si no el de la config local. */
     public static VehicleTuning carTuning() {
-        return current.tuning();
+        VehicleTuning synced = syncedTuning;
+        return synced != null ? synced : current.tuning();
+    }
+
+    /** Cliente: adopta el manejo del servidor al que se conectó. */
+    public static void setSyncedTuning(VehicleTuning tuning) {
+        syncedTuning = tuning;
+    }
+
+    /** Cliente: vuelve al manejo local al desconectarse. */
+    public static void clearSyncedTuning() {
+        syncedTuning = null;
     }
 
     public static void load(Path file) {
