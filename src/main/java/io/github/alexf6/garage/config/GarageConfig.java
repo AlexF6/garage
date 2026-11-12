@@ -1,4 +1,8 @@
-package io.github.alexf6.garage;
+package io.github.alexf6.garage.config;
+
+import io.github.alexf6.garage.GarageMod;
+import io.github.alexf6.garage.network.SyncedTunings;
+import io.github.alexf6.garage.network.TuningSyncPayload;
 
 import io.github.alexf6.garage.physics.RunOverRules;
 import io.github.alexf6.garage.physics.VehicleTuning;

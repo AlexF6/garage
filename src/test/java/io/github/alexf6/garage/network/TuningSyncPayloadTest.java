@@ -1,4 +1,4 @@
-package io.github.alexf6.garage;
+package io.github.alexf6.garage.network;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

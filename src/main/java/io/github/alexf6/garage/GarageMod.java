@@ -1,5 +1,9 @@
 package io.github.alexf6.garage;
 
+import io.github.alexf6.garage.config.GarageConfig;
+import io.github.alexf6.garage.network.HornPayload;
+import io.github.alexf6.garage.network.TuningSyncPayload;
+
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;

@@ -1,4 +1,6 @@
-package io.github.alexf6.garage;
+package io.github.alexf6.garage.network;
+
+import io.github.alexf6.garage.GarageMod;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;

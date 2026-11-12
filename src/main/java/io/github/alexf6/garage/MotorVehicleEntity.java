@@ -1,5 +1,8 @@
 package io.github.alexf6.garage;
 
+import io.github.alexf6.garage.config.GarageConfig;
+import io.github.alexf6.garage.network.SyncedTunings;
+
 import io.github.alexf6.garage.physics.VehicleInput;
 import io.github.alexf6.garage.physics.VehiclePhysics;
 import io.github.alexf6.garage.physics.VehicleTuning;

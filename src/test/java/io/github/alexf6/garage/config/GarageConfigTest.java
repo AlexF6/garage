@@ -1,4 +1,4 @@
-package io.github.alexf6.garage;
+package io.github.alexf6.garage.config;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;

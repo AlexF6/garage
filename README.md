@@ -111,9 +111,9 @@ movimiento observado, así que se ven igual para todos sin paquetes extra.
 | `physics/VehicleMath` | Funciones puras de la entidad: rumbo, giro directo, salida, empuje, rodado, dirección visual y combustible |
 | `physics/VehicleTuning`, `VehicleInput` | Parámetros de un vehículo (`WILLYS`, `ENDURO`, `MOTOCARRO`, `MOTOCARGUERO`) con sus límites, y entrada inmutable del conductor |
 | `physics/Suspension` | Resortes del cabeceo, el balanceo y el rebote (solo visual) |
-| `GarageConfig` | Lee, completa, valida y respalda `config/garage.json` |
-| `HornPayload`, `TuningSyncPayload` | Paquetes: bocina (cliente → servidor) y manejo de cada vehículo (servidor → cliente, al conectar) |
-| `SyncedTunings` | Manejo recibido del servidor, por id de vehículo; solo lo escribe y lo lee el cliente |
+| `config/GarageConfig` | Lee, completa, valida y respalda `config/garage.json` |
+| `network/HornPayload`, `TuningSyncPayload` | Paquetes: bocina (cliente → servidor) y manejo de cada vehículo (servidor → cliente, al conectar) |
+| `network/SyncedTunings` | Manejo recibido del servidor, por id de vehículo; solo lo escribe y lo lee el cliente |
 | `client/GarageClient` | Teclas del conductor, bocina, recepción del manejo y arranque del sonido del motor |
 | `client/ClientVehicles`, `VehicleRenderer` | Tabla de modelos por vehículo y renderer común (carrocería teñida + resto sin teñir) |
 | `client/ModelKit` | Atajos comunes de los modelos: capas, cubos, piezas opcionales, ruedas y suspensión |

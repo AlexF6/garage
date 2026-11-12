@@ -1,5 +1,7 @@
 package io.github.alexf6.garage;
 
+import io.github.alexf6.garage.config.GarageConfig;
+
 import io.github.alexf6.garage.physics.VehicleTuning;
 import java.util.List;
 import net.minecraft.sounds.SoundEvents;

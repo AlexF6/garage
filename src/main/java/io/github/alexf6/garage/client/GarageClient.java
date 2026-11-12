@@ -1,11 +1,15 @@
 package io.github.alexf6.garage.client;
 
+import io.github.alexf6.garage.network.HornPayload;
+import io.github.alexf6.garage.network.SyncedTunings;
+import io.github.alexf6.garage.network.TuningSyncPayload;
+
 import io.github.alexf6.garage.MotorVehicleEntity;
 import io.github.alexf6.garage.GarageMod;
-import io.github.alexf6.garage.HornPayload;
-import io.github.alexf6.garage.SyncedTunings;
+import io.github.alexf6.garage.network.HornPayload;
+import io.github.alexf6.garage.network.SyncedTunings;
 import io.github.alexf6.garage.ModVehicles;
-import io.github.alexf6.garage.TuningSyncPayload;
+import io.github.alexf6.garage.network.TuningSyncPayload;
 import io.github.alexf6.garage.VehicleSpec;
 import io.github.alexf6.garage.VehicleSpecs;
 import io.github.alexf6.garage.physics.VehicleInput;
