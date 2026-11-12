@@ -13,13 +13,12 @@ public class GarageMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        CarConfig.load(FabricLoader.getInstance().getConfigDir().resolve(MOD_ID + ".json"));
-        ModEntities.init();
-        ModItems.init();
+        GarageConfig.load(FabricLoader.getInstance().getConfigDir().resolve(MOD_ID + ".json"));
+        ModVehicles.register();
 
         PayloadTypeRegistry.serverboundPlay().register(HornPayload.TYPE, HornPayload.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(HornPayload.TYPE, (payload, context) -> {
-            if (context.player().getVehicle() instanceof CarEntity car) {
+            if (context.player().getVehicle() instanceof MotorVehicleEntity car) {
                 car.honk(context.player());
             }
         });

@@ -53,7 +53,7 @@ public final class Suspension {
     }
 
     private static double clamp(double value, double limit) {
-        return CarPhysics.clamp(value, -limit, limit);
+        return VehiclePhysics.clamp(value, -limit, limit);
     }
 
     private static float lerp(float delta, float from, float to) {

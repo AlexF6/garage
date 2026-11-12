@@ -4,13 +4,13 @@ package io.github.alexf6.garage.physics;
  * Modelo de manejo tipo "bicicleta" (Ackermann simplificado): funciones puras, O(1) por tick y sin
  * dependencias de Minecraft, para poder probarlas y reutilizarlas en otros vehículos.
  */
-public final class CarPhysics {
+public final class VehiclePhysics {
 
     private static final double STOP_EPSILON = 0.003;
 
     /** Nueva velocidad longitudinal (signo = sentido respecto al frente del carro). */
-    public static double nextSpeed(double speed, CarInput input, boolean fuelled, boolean onGround,
-                                   boolean inWater, CarTuning t) {
+    public static double nextSpeed(double speed, VehicleInput input, boolean fuelled, boolean onGround,
+                                   boolean inWater, VehicleTuning t) {
         double v = speed;
         double friction = onGround ? t.rollingFriction() : t.airDrag();
 
@@ -36,7 +36,7 @@ public final class CarPhysics {
      * Ángulo de dirección: se acerca al objetivo a {@code steerRate} por tick (y vuelve al centro más rápido
      * al soltar las teclas) y el máximo baja con la velocidad, para maniobrar cerrado sin perder estabilidad.
      */
-    public static double nextSteer(double steer, CarInput input, double speed, CarTuning t) {
+    public static double nextSteer(double steer, VehicleInput input, double speed, VehicleTuning t) {
         double ratio = Math.min(Math.abs(speed) / t.maxSpeed(), 1.0);
         double maxSteer = t.maxSteerLow() + (t.maxSteerHigh() - t.maxSteerLow()) * ratio;
         double target = input.steering() * maxSteer;
@@ -49,7 +49,7 @@ public final class CarPhysics {
      * conserva una fracción intermedia entre {@code grip} y {@code airDrag} para poder redirigir el rumbo en saltos
      * y bajadas de bloques.
      */
-    public static double nextLateral(double lateral, CarInput input, boolean onGround, boolean inWater, CarTuning t) {
+    public static double nextLateral(double lateral, VehicleInput input, boolean onGround, boolean inWater, VehicleTuning t) {
         double v;
         if (inWater) v = lateral * t.waterDrag();
         else if (!onGround) v = lateral * ((t.grip() + t.airDrag()) * 0.5);
@@ -61,13 +61,13 @@ public final class CarPhysics {
      * Grados que gira el carro en un tick: ω = v · tan(δ) / L. En reversa el giro se invierte solo.
      * Derrapando, la cola se suelta y gira más ({@code driftYawBoost}).
      */
-    public static float yawDelta(double speed, double steer, boolean drifting, CarTuning t) {
+    public static float yawDelta(double speed, double steer, boolean drifting, VehicleTuning t) {
         double omega = speed * Math.tan(steer) / t.wheelBase();
         return (float) Math.toDegrees(drifting ? omega * t.driftYawBoost() : omega);
     }
 
     /** Ángulo de dirección que explica un giro observado (inversa de {@link #yawDelta}); para animar ruedas. */
-    public static double steerFromMotion(double yawDeltaDeg, double forward, CarTuning t) {
+    public static double steerFromMotion(double yawDeltaDeg, double forward, VehicleTuning t) {
         if (Math.abs(forward) < 1.0e-3) return Double.NaN;
         return Math.atan(Math.toRadians(yawDeltaDeg) * t.wheelBase() / forward);
     }
@@ -80,5 +80,5 @@ public final class CarPhysics {
         return value < min ? min : Math.min(value, max);
     }
 
-    private CarPhysics() {}
+    private VehiclePhysics() {}
 }

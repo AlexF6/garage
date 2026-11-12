@@ -1,7 +1,8 @@
 package io.github.alexf6.garage.client;
 
-import io.github.alexf6.garage.GarageMod;
-import io.github.alexf6.garage.client.CarRenderer.CarRenderState;
+import io.github.alexf6.garage.client.VehicleRenderer.VehicleRenderState;
+import static io.github.alexf6.garage.client.ModelKit.at;
+import static io.github.alexf6.garage.client.ModelKit.cube;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -10,7 +11,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
@@ -30,15 +30,7 @@ public final class CarModels {
     private static final String FLAG = "flag_cloth";
 
     private static ModelLayerLocation layer(String name) {
-        return new ModelLayerLocation(Identifier.fromNamespaceAndPath(GarageMod.MOD_ID, "car"), name);
-    }
-
-    private static CubeListBuilder cube(int u, int v) {
-        return CubeListBuilder.create().texOffs(u, v);
-    }
-
-    private static PartPose at(float x, float y, float z) {
-        return PartPose.offset(x, y, z);
+        return ModelKit.layer("car", name);
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -143,7 +135,7 @@ public final class CarModels {
      * Una de las dos capas. La carrocería cabecea, se inclina y rebota con la suspensión; en la capa de
      * detalles además las ruedas ruedan, las delanteras giran y la bandera ondea (más rápido, más fuerte).
      */
-    public static final class Part extends EntityModel<CarRenderState> {
+    public static final class Part extends EntityModel<VehicleRenderState> {
         private static final float FLAG_SPEED = 0.35F;   // rad por tick
         private static final float FLAG_SWING_IDLE = 0.12F;
         private static final float FLAG_SWING_FAST = 0.3F;
@@ -162,7 +154,7 @@ public final class CarModels {
         }
 
         @Override
-        public void setupAnim(CarRenderState state) {
+        public void setupAnim(VehicleRenderState state) {
             super.setupAnim(state);
             chassis.xRot = state.bodyPitch;
             chassis.zRot = state.bodyRoll;

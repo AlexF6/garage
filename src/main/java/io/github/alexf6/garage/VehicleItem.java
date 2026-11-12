@@ -16,15 +16,11 @@ import net.minecraft.world.phys.Vec3;
 /**
  * Ítem que coloca un vehículo del mod en el mundo conservando su color teñido y su nombre personalizado.
  */
-public class CarItem extends Item {
+public class VehicleItem extends Item {
 
-    private final EntityType<? extends CarEntity> entityType;
+    private final EntityType<? extends MotorVehicleEntity> entityType;
 
-    public CarItem(Properties properties) {
-        this(ModEntities.CAR, properties);
-    }
-
-    public CarItem(EntityType<? extends CarEntity> entityType, Properties properties) {
+    public VehicleItem(EntityType<? extends MotorVehicleEntity> entityType, Properties properties) {
         super(properties);
         this.entityType = entityType;
     }
@@ -34,7 +30,7 @@ public class CarItem extends Item {
         Level level = context.getLevel();
         if (!(level instanceof ServerLevel serverLevel)) return InteractionResult.SUCCESS;
 
-        CarEntity vehicle = this.entityType.create(serverLevel, EntitySpawnReason.SPAWN_ITEM_USE);
+        MotorVehicleEntity vehicle = this.entityType.create(serverLevel, EntitySpawnReason.SPAWN_ITEM_USE);
         if (vehicle == null) return InteractionResult.FAIL;
 
         // Sobre la cara que se clicó, mirando hacia donde mira el jugador
@@ -44,7 +40,7 @@ public class CarItem extends Item {
         if (!level.noCollision(vehicle, vehicle.getBoundingBox())) return InteractionResult.FAIL;
 
         ItemStack stack = context.getItemInHand();
-        vehicle.setColor(DyedItemColor.getOrDefault(stack, vehicle.defaultColor()) & 0xFFFFFF);
+        vehicle.setColor(DyedItemColor.getOrDefault(stack, vehicle.defaultColor()));
         if (stack.has(DataComponents.CUSTOM_NAME)) {
             vehicle.setCustomName(stack.getHoverName());
         }

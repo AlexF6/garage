@@ -1,7 +1,8 @@
 package io.github.alexf6.garage.client;
 
-import io.github.alexf6.garage.GarageMod;
-import io.github.alexf6.garage.client.MotorcycleRenderer.MotorcycleRenderState;
+import io.github.alexf6.garage.client.VehicleRenderer.VehicleRenderState;
+import static io.github.alexf6.garage.client.ModelKit.at;
+import static io.github.alexf6.garage.client.ModelKit.cube;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -10,7 +11,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
@@ -41,15 +41,7 @@ public final class MotorcycleModels {
     private static final float FORK_RAKE = -0.42F;
 
     private static ModelLayerLocation layer(String name) {
-        return new ModelLayerLocation(Identifier.fromNamespaceAndPath(GarageMod.MOD_ID, "motorcycle"), name);
-    }
-
-    private static CubeListBuilder cube(int u, int v) {
-        return CubeListBuilder.create().texOffs(u, v);
-    }
-
-    private static PartPose at(float x, float y, float z) {
-        return PartPose.offset(x, y, z);
+        return ModelKit.layer("motorcycle", name);
     }
 
     /**
@@ -218,7 +210,7 @@ public final class MotorcycleModels {
      * Ejecuta la cinemática de la Yamaha XTZ 125: rodadura continua de ruedas, giro de la horquilla con
      * su ángulo de avance (-24°), pulsación monocilíndrica en ralentí y tumbada dinámica en curva.
      */
-    public static final class Part extends EntityModel<MotorcycleRenderState> {
+    public static final class Part extends EntityModel<VehicleRenderState> {
         private final ModelPart leanRoot;
         private final ModelPart chassis;
         private final ModelPart steering;
@@ -240,7 +232,7 @@ public final class MotorcycleModels {
         }
 
         @Override
-        public void setupAnim(MotorcycleRenderState state) {
+        public void setupAnim(VehicleRenderState state) {
             super.setupAnim(state);
 
             // a) Tumbada dinámica (lean angle) sobre la línea de contacto con el suelo (Y = 24)

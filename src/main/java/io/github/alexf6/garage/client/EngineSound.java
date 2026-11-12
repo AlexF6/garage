@@ -1,7 +1,8 @@
 package io.github.alexf6.garage.client;
 
-import io.github.alexf6.garage.CarConfig;
-import io.github.alexf6.garage.CarEntity;
+import io.github.alexf6.garage.GarageConfig;
+import io.github.alexf6.garage.MotorVehicleEntity;
+import io.github.alexf6.garage.VehicleSpec;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundEvents;
@@ -10,22 +11,22 @@ import net.minecraft.util.Mth;
 
 /**
  * Motor de un vehículo del mod, solo en el cliente y sin paquetes: un sonido en bucle que sigue al vehículo
- * y cuyo tono sube con la velocidad entre {@link CarEntity#idleEnginePitch()} y {@link CarEntity#topEnginePitch()}.
+ * y cuyo tono sube con la velocidad entre {@link VehicleSpec#idlePitch()} y {@link VehicleSpec#topPitch()}.
  * Arranca en silencio al cargar la entidad y se oye mientras haya conductor y combustible (ambos sincronizados).
  */
-public class CarEngineSound extends AbstractTickableSoundInstance {
+public class EngineSound extends AbstractTickableSoundInstance {
 
     private static final float IDLE_VOLUME = 0.35F; // fracción del volumen configurado en ralentí
 
-    private final CarEntity car;
+    private final MotorVehicleEntity car;
 
-    public CarEngineSound(CarEntity car) {
+    public EngineSound(MotorVehicleEntity car) {
         super(SoundEvents.MINECART_RIDING, SoundSource.NEUTRAL, SoundInstance.createUnseededRandom());
         this.car = car;
         this.looping = true;
         this.delay = 0;
         this.volume = 0.0F;
-        this.pitch = car.idleEnginePitch();
+        this.pitch = car.spec().idlePitch();
         follow();
     }
 
@@ -47,13 +48,13 @@ public class CarEngineSound extends AbstractTickableSoundInstance {
         }
         follow();
 
-        float ratio = (float) Mth.clamp(Math.abs(this.car.getForwardSpeed()) / this.car.tuning().maxSpeed(), 0.0, 1.0);
+        float ratio = (float) this.car.speedRatio();
         float targetVolume = this.car.isEngineRunning()
-                ? CarConfig.get().engineVolume() * Mth.lerp(ratio, IDLE_VOLUME, 1.0F)
+                ? GarageConfig.get().engineVolume() * Mth.lerp(ratio, IDLE_VOLUME, 1.0F)
                 : 0.0F;
         // Suavizado: el motor no se prende ni cambia de tono de golpe
         this.volume = Mth.lerp(0.2F, this.volume, targetVolume);
-        this.pitch = Mth.lerp(0.2F, this.pitch, Mth.lerp(ratio, this.car.idleEnginePitch(), this.car.topEnginePitch()));
+        this.pitch = Mth.lerp(0.2F, this.pitch, Mth.lerp(ratio, this.car.spec().idlePitch(), this.car.spec().topPitch()));
     }
 
     private void follow() {

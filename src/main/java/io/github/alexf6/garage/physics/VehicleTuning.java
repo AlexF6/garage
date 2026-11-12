@@ -3,13 +3,13 @@ package io.github.alexf6.garage.physics;
 /**
  * Parámetros de manejo de un vehículo. Velocidades en bloques/tick (1 b/t = 72 km/h), ángulos en radianes,
  * fricciones y agarres como factor que se conserva por tick (1 = no frena, 0 = frena en seco).
- * Un vehículo nuevo solo necesita otra instancia, sin tocar {@link CarPhysics}.
+ * Un vehículo nuevo solo necesita otra instancia (más su entrada en {@code VehicleSpecs}), sin tocar {@link VehiclePhysics}.
  *
  * @param grip          velocidad lateral que se conserva por tick con agarre normal
  * @param driftGrip     velocidad lateral que se conserva con el freno de mano (derrape)
  * @param driftYawBoost multiplica el giro mientras se derrapa: la cola se suelta
  */
-public record CarTuning(
+public record VehicleTuning(
         double maxSpeed,
         double maxReverse,
         double accel,
@@ -28,7 +28,7 @@ public record CarTuning(
         double driftYawBoost
 ) {
     /** Jeep Willys: ~43 km/h, buena maniobra a baja velocidad, dirección más firme a alta. */
-    public static final CarTuning WILLYS = new CarTuning(
+    public static final VehicleTuning WILLYS = new VehicleTuning(
             0.6, 0.2,
             0.03, 0.02,
             0.04, 0.035,
@@ -40,7 +40,7 @@ public record CarTuning(
     );
 
     /** Moto enduro/dual-sport (Yamaha XTZ 125): ligera (~118 kg), ~68 km/h (0.92 b/t), alto torque y giro cerrado. */
-    public static final CarTuning ENDURO = new CarTuning(
+    public static final VehicleTuning ENDURO = new VehicleTuning(
             0.92, 0.18,
             0.050, 0.02,
             0.055, 0.05,
@@ -52,7 +52,7 @@ public record CarTuning(
     );
 
     /** Motocarro urbano (Bajaj RE / "Torito"): ligero-medio, ~52 km/h (0.72 b/t), radio cerrado. */
-    public static final CarTuning MOTOCARRO = new CarTuning(
+    public static final VehicleTuning MOTOCARRO = new VehicleTuning(
             0.72, 0.18,
             0.038, 0.018,
             0.045, 0.040,

@@ -1,6 +1,6 @@
 package io.github.alexf6.garage;
 
-import io.github.alexf6.garage.physics.CarTuning;
+import io.github.alexf6.garage.physics.VehicleTuning;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -23,7 +23,7 @@ import java.util.Map;
  * @param fuelPerItem  ticks que suma cada unidad de combustible
  * @param engineVolume volumen del motor (0 lo apaga)
  */
-public record CarConfig(int maxFuel, int fuelPerItem, float engineVolume, CarTuning tuning, RunOver runOver) {
+public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, VehicleTuning tuning, RunOver runOver) {
 
     /**
      * Atropello y empuje de criaturas, en bloques/tick (0.1 b/t = 7.2 km/h).
@@ -37,14 +37,19 @@ public record CarConfig(int maxFuel, int fuelPerItem, float engineVolume, CarTun
     public record RunOver(boolean enabled, double pushSpeed, double damageSpeed, double damagePerSpeed,
                           double knockback, boolean hurtPlayers) {}
 
-    public static final CarConfig DEFAULT = new CarConfig(12000, 1600, 0.6F, CarTuning.WILLYS,
+    public static final GarageConfig DEFAULT = new GarageConfig(12000, 1600, 0.6F, VehicleTuning.WILLYS,
             new RunOver(true, 0.1, 0.25, 25.0, 1.2, false));
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static CarConfig current = DEFAULT;
+    private static GarageConfig current = DEFAULT;
 
-    public static CarConfig get() {
+    public static GarageConfig get() {
         return current;
+    }
+
+    /** Manejo del Jeep, el de la config local. */
+    public static VehicleTuning carTuning() {
+        return current.tuning();
     }
 
     public static void load(Path file) {
@@ -53,7 +58,7 @@ public record CarConfig(int maxFuel, int fuelPerItem, float engineVolume, CarTun
             if (Files.exists(file)) {
                 mergeInto(merged, JsonParser.parseString(Files.readString(file)).getAsJsonObject());
             }
-            current = validate(GSON.fromJson(merged, CarConfig.class));
+            current = validate(GSON.fromJson(merged, GarageConfig.class));
             Files.writeString(file, GSON.toJson(current));
         } catch (IOException | RuntimeException e) {
             // Un archivo roto no debe impedir jugar: se usan los valores por defecto y no se sobrescribe
@@ -62,8 +67,8 @@ public record CarConfig(int maxFuel, int fuelPerItem, float engineVolume, CarTun
         }
     }
 
-    private static CarConfig validate(CarConfig config) {
-        CarTuning tuning = config.tuning();
+    private static GarageConfig validate(GarageConfig config) {
+        VehicleTuning tuning = config.tuning();
         String invalid = tuning == null ? "null" : tuning.firstInvalid();
         if (invalid != null) {
             GarageMod.LOGGER.warn("garage.json: valor inválido en tuning ({}); se usa el manejo por defecto", invalid);
@@ -75,7 +80,7 @@ public record CarConfig(int maxFuel, int fuelPerItem, float engineVolume, CarTun
         double damagePerSpeed = Math.clamp(r.damagePerSpeed(), 0.0, 1000.0);
         double knockback = Math.clamp(r.knockback(), 0.0, 10.0);
         RunOver runOver = new RunOver(r.enabled(), pushSpeed, damageSpeed, damagePerSpeed, knockback, r.hurtPlayers());
-        return new CarConfig(Math.max(1, config.maxFuel()), Math.max(0, config.fuelPerItem()),
+        return new GarageConfig(Math.max(1, config.maxFuel()), Math.max(0, config.fuelPerItem()),
                 Math.clamp(config.engineVolume(), 0.0F, 1.0F), tuning, runOver);
     }
 

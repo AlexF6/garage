@@ -1,7 +1,8 @@
 package io.github.alexf6.garage.client;
 
-import io.github.alexf6.garage.GarageMod;
-import io.github.alexf6.garage.client.MotocarroRenderer.MotocarroRenderState;
+import io.github.alexf6.garage.client.VehicleRenderer.VehicleRenderState;
+import static io.github.alexf6.garage.client.ModelKit.at;
+import static io.github.alexf6.garage.client.ModelKit.cube;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -10,7 +11,6 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.resources.Identifier;
 
 /**
  * Modelo de Motocarro urbano (Bajaj RE / "Torito") en dos capas que comparten textura (256x256):
@@ -29,15 +29,7 @@ public final class MotocarroModels {
     private static final String STEERING = "steering";
 
     private static ModelLayerLocation layer(String name) {
-        return new ModelLayerLocation(Identifier.fromNamespaceAndPath(GarageMod.MOD_ID, "motocarro"), name);
-    }
-
-    private static CubeListBuilder cube(int u, int v) {
-        return CubeListBuilder.create().texOffs(u, v);
-    }
-
-    private static PartPose at(float x, float y, float z) {
-        return PartPose.offset(x, y, z);
+        return ModelKit.layer("motocarro", name);
     }
 
     /** Capa BODY: paneles de carrocería que se tiñen con el color del motocarro (blanco glaciar por defecto). */
@@ -155,7 +147,7 @@ public final class MotocarroModels {
      * Submodelo para una capa (BODY o TRIM).
      * Aplica la cinemática de triciclo Delta, balanceo centrífugo, cabeceo de suspensión y ralentí.
      */
-    public static final class Part extends EntityModel<MotocarroRenderState> {
+    public static final class Part extends EntityModel<VehicleRenderState> {
         private final ModelPart chassis;
         private final ModelPart steering;
         private final ModelPart[] wheels = new ModelPart[WHEELS.length];
@@ -170,7 +162,7 @@ public final class MotocarroModels {
         }
 
         @Override
-        public void setupAnim(MotocarroRenderState state) {
+        public void setupAnim(VehicleRenderState state) {
             super.setupAnim(state);
 
             // Ruedas en el suelo: las 3 ruedan y la delantera (índice 0) gira con el manillar
