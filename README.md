@@ -28,7 +28,7 @@ el mod está pensado para sumar más vehículos. Hay que tener el mod en cliente
 - Velocidad máxima hacia adelante de unos 43 km/h en el carro (14 km/h en reversa), 68 km/h en la moto Enduro, 52 km/h en el motocarro y 47 km/h en el motocarguero. Todos suben bloques completos sin saltar.
 - La dirección depende de la velocidad: a baja velocidad gira cerrado (radio de unos 2.5 bloques) y a alta se endurece.
   En reversa el giro se invierte, como en un carro real.
-- En el agua se hunde despacio y no tiene tracción. El carro amortigua las caídas: los pasajeros no reciben daño.
+- En el agua se hunde despacio y no tiene tracción. El vehículo amortigua las caídas: los pasajeros no reciben daño.
 - Desde unos 7 km/h aparta a las criaturas que tiene delante y desde 18 km/h además las lastima. A otros jugadores
   solo los empuja.
 
@@ -72,7 +72,7 @@ Las velocidades van en bloques/tick (1 b/t = 72 km/h) y los factores son lo que 
 | `tuning.steerRate` | 0.1 | mayor que 0, hasta 1 | Cuánto se mueve el volante por tick (radianes) |
 | `tuning.grip` | 0.3 | 0 a 1 | Factor de la velocidad lateral con agarre normal |
 | `tuning.driftGrip` | 0.92 | 0 a 1 | Factor de la velocidad lateral con freno de mano (más alto, más derrape) |
-| `tuning.driftYawBoost` | 1.6 | mayor que 0, hasta 10 | Cuánto más gira el carro mientras derrapa |
+| `tuning.driftYawBoost` | 1.6 | mayor que 0, hasta 10 | Cuánto más gira el vehículo mientras derrapa |
 | `runOver.enabled` | true | true / false | Empujar y atropellar criaturas |
 | `runOver.pushSpeed` | 0.1 | 0 a 10 | Velocidad desde la que empuja (b/t) |
 | `runOver.damageSpeed` | 0.25 | `pushSpeed` a 10 | Velocidad desde la que además lastima (b/t) |

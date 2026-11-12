@@ -183,7 +183,7 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
         boolean inWater = isInWater();
 
         // Primero gira con la velocidad que traía; luego la velocidad se descompone en el rumbo nuevo, así
-        // lo que el carro no alcanzó a girar queda como velocidad lateral (derrape) y las llantas la absorben
+        // lo que el vehículo no alcanzó a girar queda como velocidad lateral (derrape) y las llantas la absorben
         double speed = VehicleMath.forwardOf(motion.x, motion.z, getYRot());
         steerAngle = VehiclePhysics.nextSteer(steerAngle, input, speed, tuning);
         float yawStep = VehiclePhysics.yawDelta(speed, steerAngle, onGround && input.brake(), tuning);
@@ -341,6 +341,7 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
     /** Igual que VehicleEntity.destroy, pero el item soltado conserva el color. */
     @Override
     public void destroy(ServerLevel level, Item item) {
+        // El override de vanilla pide el ítem, pero aquí siempre es getDropItem(): el ítem sale del spec
         kill(level);
         if (level.getGameRules().get(GameRules.ENTITY_DROPS)) {
             ItemStack stack = ModVehicles.stack(spec, getColor());
