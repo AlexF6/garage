@@ -20,38 +20,47 @@ class ClientConfigTest {
 
     @AfterEach
     void reset() {
-        ClientConfig.load(dir.resolve("vacio.json"), null);
+        ClientConfig.load(dir.resolve("vacio.json"));
     }
 
     @Test
     void sinArchivoUsaElValorPorDefectoYLoCrea() throws Exception {
         Path file = dir.resolve("garage-client.json");
-        ClientConfig.load(file, null);
+        ClientConfig.load(file);
         assertEquals(ClientConfig.DEFAULT, ClientConfig.get());
         assertTrue(Files.readString(file).contains("engineVolume"));
     }
 
     @Test
-    void sinArchivoSeMigraElVolumenDeLaConfigAntigua() throws Exception {
+    void migrateCreaElArchivoNuevoConElValorAntiguo() throws Exception {
         Path file = dir.resolve("garage-client.json");
-        ClientConfig.load(file, 0.3F);
+        assertTrue(ClientConfig.migrate(file, 0.3F));
+        ClientConfig.load(file);
         assertEquals(0.3F, ClientConfig.get().engineVolume());
-        assertTrue(Files.readString(file).contains("0.3"), "queda escrito en el archivo nuevo");
     }
 
     @Test
-    void siYaExisteElArchivoNuevoGanaElVolumenAntiguo() throws Exception {
+    void migrateNuncaPisaUnArchivoExistente() throws Exception {
         Path file = dir.resolve("garage-client.json");
         Files.writeString(file, "{\"engineVolume\": 0.9}");
-        ClientConfig.load(file, 0.1F);
+        assertFalse(ClientConfig.migrate(file, 0.1F));
+        ClientConfig.load(file);
         assertEquals(0.9F, ClientConfig.get().engineVolume());
+    }
+
+    @Test
+    void migrateAcotaUnValorFueraDeRango() throws Exception {
+        Path file = dir.resolve("garage-client.json");
+        ClientConfig.migrate(file, 7.0F);
+        ClientConfig.load(file);
+        assertEquals(1.0F, ClientConfig.get().engineVolume());
     }
 
     @Test
     void unArchivoSinLaClaveUsaElValorPorDefecto() throws Exception {
         Path file = dir.resolve("garage-client.json");
         Files.writeString(file, "{}");
-        ClientConfig.load(file, 0.1F);
+        ClientConfig.load(file);
         assertEquals(ClientConfig.DEFAULT, ClientConfig.get());
     }
 
@@ -59,7 +68,7 @@ class ClientConfigTest {
     void unVolumenFueraDeRangoSeAcotaYSeAvisa() throws Exception {
         Path file = dir.resolve("garage-client.json");
         Files.writeString(file, "{\"engineVolume\": 5.0}");
-        ClientConfig.load(file, null);
+        ClientConfig.load(file);
         assertEquals(1.0F, ClientConfig.get().engineVolume());
         List<String> fixes = new ArrayList<>();
         assertEquals(0.0F, ClientConfig.sanitize(new ClientConfig(-2.0F), fixes).engineVolume());
@@ -84,7 +93,7 @@ class ClientConfigTest {
     void unArchivoCorruptoSeGuardaComoBakYSeRegenera() throws Exception {
         Path file = dir.resolve("garage-client.json");
         Files.writeString(file, "{ esto no es json");
-        ClientConfig.load(file, null);
+        ClientConfig.load(file);
         assertEquals(ClientConfig.DEFAULT, ClientConfig.get());
         assertEquals("{ esto no es json", Files.readString(dir.resolve("garage-client.json.bak")));
         assertTrue(Files.readString(file).contains("engineVolume"));
@@ -95,7 +104,7 @@ class ClientConfigTest {
         Path file = dir.resolve("garage-client.json");
         byte[] garbage = {'{', (byte) 0xC3, (byte) 0x28, '}'};
         Files.write(file, garbage);
-        ClientConfig.load(file, null);
+        ClientConfig.load(file);
         assertEquals(ClientConfig.DEFAULT, ClientConfig.get());
         assertArrayEquals(garbage, Files.readAllBytes(dir.resolve("garage-client.json.bak")));
     }
@@ -107,7 +116,7 @@ class ClientConfigTest {
             Path file = dir.resolve("garage-client.json");
             Files.deleteIfExists(dir.resolve("garage-client.json.bak"));
             Files.writeString(file, content);
-            ClientConfig.load(file, null);
+            ClientConfig.load(file);
             assertEquals(ClientConfig.DEFAULT, ClientConfig.get(), content);
             assertEquals(content, Files.readString(dir.resolve("garage-client.json.bak")), content);
             assertTrue(Files.readString(file).contains("engineVolume"), "regenerado: " + content);
@@ -118,14 +127,14 @@ class ClientConfigTest {
     void unaClaveNulaUsaElValorPorDefecto() throws Exception {
         Path file = dir.resolve("garage-client.json");
         Files.writeString(file, "{\"engineVolume\": null}");
-        ClientConfig.load(file, null);
+        ClientConfig.load(file);
         assertEquals(ClientConfig.DEFAULT, ClientConfig.get());
         assertFalse(Files.exists(dir.resolve("garage-client.json.bak")));
     }
 
     @Test
     void laEscrituraNoDejaArchivosTemporales() throws Exception {
-        ClientConfig.load(dir.resolve("garage-client.json"), null);
+        ClientConfig.load(dir.resolve("garage-client.json"));
         try (var files = Files.list(dir)) {
             assertEquals(List.of("garage-client.json"), files.map(p -> p.getFileName().toString()).sorted().toList());
         }

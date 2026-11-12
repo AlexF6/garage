@@ -7,7 +7,6 @@ import io.github.alexf6.garage.network.TuningSyncPayload;
 import io.github.alexf6.garage.MotorVehicleEntity;
 import io.github.alexf6.garage.GarageMod;
 import io.github.alexf6.garage.config.ClientConfig;
-import io.github.alexf6.garage.config.GarageConfig;
 import io.github.alexf6.garage.ModVehicles;
 import io.github.alexf6.garage.VehicleSpec;
 import io.github.alexf6.garage.VehicleSpecs;
@@ -40,9 +39,7 @@ public class GarageClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        // El volumen del motor vivía en garage.json (que el servidor ya cargó): se migra la primera vez
-        ClientConfig.load(FabricLoader.getInstance().getConfigDir().resolve(GarageMod.MOD_ID + "-client.json"),
-                GarageConfig.legacyEngineVolume());
+        ClientConfig.load(FabricLoader.getInstance().getConfigDir().resolve(ClientConfig.FILE_NAME));
         for (VehicleSpec spec : VehicleSpecs.ALL) {
             ClientVehicles.Model model = ClientVehicles.lookOf(spec);
             ModelLayerRegistry.registerModelLayer(model.look().body(), model.bodyLayer()::get);

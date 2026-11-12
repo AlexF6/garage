@@ -21,8 +21,9 @@ import java.util.List;
  * <p>Mismas reglas que {@link GarageConfig}: lo que falta toma el valor por defecto, lo que se sale de rango se
  * corrige y se avisa, y un archivo corrupto se guarda como {@code .bak} y se regenera.
  *
- * <p>Migración: {@code engineVolume} vivía en {@code garage.json}. Si todavía no existe este archivo, se parte del
- * valor que había allí.
+ * <p>Migración: {@code engineVolume} vivía en {@code garage.json}. Al cargar esa config, {@link GarageConfig} crea este
+ * archivo con el valor que había allí si todavía no existe (ver {@link #migrate}); así no depende del orden en que
+ * arranquen el servidor y el cliente.
  *
  * @param engineVolume volumen del motor, de 0 (apagado) a 1
  */
@@ -39,11 +40,11 @@ public record ClientConfig(float engineVolume) {
         return current;
     }
 
-    /**
-     * @param legacyEngineVolume el {@code engineVolume} que tenía el {@code garage.json} anterior, o {@code null}
-     */
-    public static void load(Path file, Float legacyEngineVolume) {
-        ClientConfig parsed = legacyEngineVolume != null ? new ClientConfig(legacyEngineVolume) : DEFAULT;
+    /** Nombre del archivo dentro de {@code config/}. */
+    public static final String FILE_NAME = GarageMod.MOD_ID + "-client.json";
+
+    public static void load(Path file) {
+        ClientConfig parsed = DEFAULT;
         try {
             if (Files.exists(file)) {
                 try {
@@ -63,6 +64,21 @@ public record ClientConfig(float engineVolume) {
         current = sanitize(parsed, fixes);
         fixes.forEach(fix -> GarageMod.LOGGER.warn("garage-client.json: {}", fix));
         write(file, current);
+    }
+
+    /**
+     * Crea {@code file} con {@code volume} (acotado al rango) si todavía no existe; nunca pisa uno existente.
+     *
+     * @return {@code true} si lo creó
+     */
+    static boolean migrate(Path file, float volume) {
+        if (Files.exists(file)) return false;
+        List<String> fixes = new ArrayList<>();
+        ClientConfig config = sanitize(new ClientConfig(volume), fixes);
+        fixes.forEach(fix -> GarageMod.LOGGER.warn("{} (migrado de garage.json): {}", FILE_NAME, fix));
+        write(file, config);
+        GarageMod.LOGGER.info("engineVolume pasó de garage.json a {}", FILE_NAME);
+        return Files.exists(file);
     }
 
     /** Lee el volumen; falta o {@code null} = por defecto; cualquier otro tipo que no sea un número es un archivo dañado. */

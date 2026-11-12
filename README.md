@@ -89,8 +89,8 @@ mismas reglas de validación y copia de seguridad que `garage.json`.
 |---|---|---|---|
 | `engineVolume` | 0.6 | 0 a 1 | Volumen del motor (0 lo apaga) |
 
-`engineVolume` vivía en `garage.json`: la primera vez que se abre el juego, el valor que tuvieras allí se copia a este
-archivo.
+`engineVolume` vivía en `garage.json`: al cargar esa config por primera vez, el valor que tuvieras allí se copia a este
+archivo si todavía no existe (en un servidor dedicado también se crea, pero el servidor no lo lee).
 
 El servidor calcula los atropellos con la velocidad que mide entre dos ticks, limitada a la `maxSpeed` del vehículo,
 así que un cliente alterado no consigue más daño ni empuje del que permite el manejo.

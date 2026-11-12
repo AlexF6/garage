@@ -19,7 +19,7 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 ### Changed
 - Las ruedas de radios de la moto y el motocarguero se construyen con `ModelKit.addWheel` en vez de repetir el mismo bloque; la geometría horneada de los cuatro modelos es idéntica.
 - La animación visual sale de `MotorVehicleEntity` a `physics/VehicleAnimation`, con pruebas, y la entidad queda más corta.
-- `engineVolume` pasa de `garage.json` a un `config/garage-client.json` propio, que solo lee el cliente: es un ajuste de cliente y no debía mezclarse con las reglas del servidor. El valor que hubiera en `garage.json` se migra la primera vez.
+- `engineVolume` pasa de `garage.json` a un `config/garage-client.json` propio, que solo lee el cliente: es un ajuste de cliente y no debía mezclarse con las reglas del servidor. El valor que hubiera en `garage.json` se migra al cargar esa config, sin depender del orden de arranque del cliente y el servidor.
 - `GarageConfig` pasa al paquete `config` y los paquetes de red (`HornPayload`, `TuningSyncPayload`, `SyncedTunings`) a `network`, como pide la guía de estructura.
 - La descripción del mod en `fabric.mod.json` pasa a inglés y su traducción (`modmenu.descriptionTranslation.garage`) vive en los tres archivos de idioma.
 - `RunOverRules` (en `physics/`) agrupa la sección `runOver` de la config; `ModelKit.IdleVibration` comparte el ralentí de los modelos; `DismountLocator` ya no cambia la postura del pasajero por su cuenta.

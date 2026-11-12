@@ -53,7 +53,6 @@ public record GarageConfig(int maxFuel, int fuelPerItem, VehicleTuning tuning, R
     // Se escribe una sola vez al arrancar (load); el resto del tiempo solo se lee. Lo que el cliente recibe del
     // servidor vive aparte, en SyncedTunings, para que el cliente nunca pise la config del servidor integrado.
     private static volatile GarageConfig current = DEFAULT;
-    private static volatile Float legacyEngineVolume;
 
     public static GarageConfig get() {
         return current;
@@ -65,7 +64,6 @@ public record GarageConfig(int maxFuel, int fuelPerItem, VehicleTuning tuning, R
     }
 
     public static void load(Path file) {
-        legacyEngineVolume = null;
         JsonObject merged = GSON.toJsonTree(DEFAULT).getAsJsonObject();
         GarageConfig parsed;
         try {
@@ -80,7 +78,7 @@ public record GarageConfig(int maxFuel, int fuelPerItem, VehicleTuning tuning, R
                 }
                 try {
                     JsonObject user = JsonParser.parseString(text).getAsJsonObject();
-                    captureLegacyEngineVolume(user);
+                    migrateLegacyEngineVolume(file, user);
                     mergeInto(merged, user);
                     saturateInt(merged, "maxFuel");
                     saturateInt(merged, "fuelPerItem");
@@ -179,15 +177,14 @@ public record GarageConfig(int maxFuel, int fuelPerItem, VehicleTuning tuning, R
         }
     }
 
-    /** El {@code engineVolume} que este archivo tenía antes de pasar a {@link ClientConfig}, o {@code null}. */
-    public static Float legacyEngineVolume() {
-        return legacyEngineVolume;
-    }
-
-    private static void captureLegacyEngineVolume(JsonObject user) {
+    /**
+     * {@code engineVolume} vivía en este archivo y ahora es de {@link ClientConfig}: antes de reescribirlo sin esa
+     * clave, el valor se pasa a {@code garage-client.json}, junto a este archivo, si todavía no existe.
+     */
+    private static void migrateLegacyEngineVolume(Path file, JsonObject user) {
         JsonElement legacy = user.get("engineVolume");
         if (legacy != null && legacy.isJsonPrimitive() && legacy.getAsJsonPrimitive().isNumber()) {
-            legacyEngineVolume = legacy.getAsFloat();
+            ClientConfig.migrate(file.resolveSibling(ClientConfig.FILE_NAME), legacy.getAsFloat());
         }
     }
 

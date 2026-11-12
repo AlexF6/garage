@@ -135,13 +135,37 @@ class GarageConfigTest {
     }
 
     @Test
-    void elVolumenDelMotorYaNoEsDeLaConfigDelServidor() throws Exception {
+    void elVolumenDelMotorSeMigraAlArchivoDeCliente() throws Exception {
         Path file = dir.resolve("garage.json");
         Files.writeString(file, "{\"maxFuel\": 500, \"engineVolume\": 0.25}");
         GarageConfig.load(file);
         assertEquals(500, GarageConfig.get().maxFuel());
-        assertEquals(0.25F, GarageConfig.legacyEngineVolume(), "se conserva para migrarlo a la config de cliente");
         assertFalse(Files.readString(file).contains("engineVolume"), "el archivo del servidor ya no lo escribe");
+        Path client = dir.resolve(ClientConfig.FILE_NAME);
+        assertTrue(Files.exists(client), "se creó junto al archivo del servidor");
+        ClientConfig.load(client);
+        assertEquals(0.25F, ClientConfig.get().engineVolume());
+    }
+
+    @Test
+    void laMigracionNoPisaLaConfigDeClienteYaExistente() throws Exception {
+        Path client = dir.resolve(ClientConfig.FILE_NAME);
+        Files.writeString(client, "{\"engineVolume\": 0.9}");
+        Path file = dir.resolve("garage.json");
+        Files.writeString(file, "{\"engineVolume\": 0.25}");
+        GarageConfig.load(file);
+        ClientConfig.load(client);
+        assertEquals(0.9F, ClientConfig.get().engineVolume());
+    }
+
+    @Test
+    void sinLaClaveAntiguaNoSeCreaNingunArchivoDeCliente() throws Exception {
+        Path file = dir.resolve("garage.json");
+        Files.writeString(file, "{\"maxFuel\": 500}");
+        GarageConfig.load(file);
+        assertFalse(Files.exists(dir.resolve(ClientConfig.FILE_NAME)));
+        GarageConfig.load(dir.resolve("otro.json"));
+        assertFalse(Files.exists(dir.resolve(ClientConfig.FILE_NAME)), "tampoco al crear uno nuevo");
     }
 
     @Test
