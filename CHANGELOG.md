@@ -17,6 +17,7 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 - Base común (`MotorVehicleEntity`, `VehicleItem`, `EngineSound`) para compartir colisiones, inventario, combustible, atropellos (`runOver`) y sonido de motor parametrizado entre todos los vehículos.
 
 ### Changed
+- `engineVolume` pasa de `garage.json` a un `config/garage-client.json` propio, que solo lee el cliente: es un ajuste de cliente y no debía mezclarse con las reglas del servidor. El valor que hubiera en `garage.json` se migra la primera vez.
 - `GarageConfig` pasa al paquete `config` y los paquetes de red (`HornPayload`, `TuningSyncPayload`, `SyncedTunings`) a `network`, como pide la guía de estructura.
 - La descripción del mod en `fabric.mod.json` pasa a inglés y su traducción (`modmenu.descriptionTranslation.garage`) vive en los tres archivos de idioma.
 - `RunOverRules` (en `physics/`) agrupa la sección `runOver` de la config; `ModelKit.IdleVibration` comparte el ralentí de los modelos; `DismountLocator` ya no cambia la postura del pasajero por su cuenta.

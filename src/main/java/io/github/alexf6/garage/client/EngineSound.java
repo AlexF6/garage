@@ -1,9 +1,8 @@
 package io.github.alexf6.garage.client;
 
-import io.github.alexf6.garage.config.GarageConfig;
 
-import io.github.alexf6.garage.config.GarageConfig;
 import io.github.alexf6.garage.MotorVehicleEntity;
+import io.github.alexf6.garage.config.ClientConfig;
 import io.github.alexf6.garage.VehicleSpec;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -52,7 +51,7 @@ public class EngineSound extends AbstractTickableSoundInstance {
 
         float ratio = (float) this.vehicle.speedRatio();
         float targetVolume = this.vehicle.isEngineRunning()
-                ? GarageConfig.get().engineVolume() * Mth.lerp(ratio, IDLE_VOLUME, 1.0F)
+                ? ClientConfig.get().engineVolume() * Mth.lerp(ratio, IDLE_VOLUME, 1.0F)
                 : 0.0F;
         // Suavizado: el motor no se prende ni cambia de tono de golpe
         this.volume = Mth.lerp(0.2F, this.volume, targetVolume);

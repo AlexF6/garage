@@ -117,7 +117,7 @@ class GarageConfigTest {
     @Test
     void unaClaveNulaUsaElValorPorDefecto() throws Exception {
         Path file = dir.resolve("garage.json");
-        Files.writeString(file, "{\"maxFuel\": null, \"fuelPerItem\": null, \"engineVolume\": null}");
+        Files.writeString(file, "{\"maxFuel\": null, \"fuelPerItem\": null}");
         GarageConfig.load(file);
         assertEquals(GarageConfig.DEFAULT, GarageConfig.get());
         assertFalse(Files.exists(dir.resolve("garage.json.bak")), "no es un archivo roto");
@@ -126,13 +126,22 @@ class GarageConfigTest {
     @Test
     void combustibleFueraDeRangoSeAcotaYSeAvisa() throws Exception {
         Path file = dir.resolve("garage.json");
-        Files.writeString(file, "{\"maxFuel\": 2000000000, \"fuelPerItem\": 2000000000, \"engineVolume\": 5.0}");
+        Files.writeString(file, "{\"maxFuel\": 2000000000, \"fuelPerItem\": 2000000000}");
         GarageConfig.load(file);
         GarageConfig config = GarageConfig.get();
         assertEquals(GarageConfig.MAX_FUEL_LIMIT, config.maxFuel());
         assertEquals(GarageConfig.MAX_FUEL_LIMIT, config.fuelPerItem());
-        assertEquals(1.0F, config.engineVolume());
         assertTrue(Files.readString(file).contains("1000000"), "el archivo se reescribe con el valor corregido");
+    }
+
+    @Test
+    void elVolumenDelMotorYaNoEsDeLaConfigDelServidor() throws Exception {
+        Path file = dir.resolve("garage.json");
+        Files.writeString(file, "{\"maxFuel\": 500, \"engineVolume\": 0.25}");
+        GarageConfig.load(file);
+        assertEquals(500, GarageConfig.get().maxFuel());
+        assertEquals(0.25F, GarageConfig.legacyEngineVolume(), "se conserva para migrarlo a la config de cliente");
+        assertFalse(Files.readString(file).contains("engineVolume"), "el archivo del servidor ya no lo escribe");
     }
 
     @Test
@@ -148,17 +157,16 @@ class GarageConfigTest {
     @Test
     void sanitizeAnotaCadaCorreccion() {
         List<String> fixes = new ArrayList<>();
-        GarageConfig raw = new GarageConfig(0, -3, Float.NaN, GarageConfig.DEFAULT.tuning(),
+        GarageConfig raw = new GarageConfig(0, -3, GarageConfig.DEFAULT.tuning(),
                 new RunOverRules(true, 99.0, 0.0, 5000.0, -1.0, false));
         GarageConfig fixed = GarageConfig.sanitize(raw, fixes);
         assertEquals(1, fixed.maxFuel());
         assertEquals(0, fixed.fuelPerItem());
-        assertEquals(GarageConfig.DEFAULT.engineVolume(), fixed.engineVolume());
         assertEquals(10.0, fixed.runOver().pushSpeed());
         assertEquals(10.0, fixed.runOver().damageSpeed(), "damageSpeed nunca baja de pushSpeed");
         assertEquals(1000.0, fixed.runOver().damagePerSpeed());
         assertEquals(0.0, fixed.runOver().knockback());
-        assertEquals(7, fixes.size(), fixes.toString());
+        assertEquals(6, fixes.size(), fixes.toString());
     }
 
     @Test

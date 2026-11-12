@@ -14,10 +14,8 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.nio.charset.CharacterCodingException;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,9 +33,8 @@ import java.util.Map;
  *
  * @param maxFuel      ticks de acelerador con el tanque lleno, de 1 a {@value #MAX_FUEL_LIMIT}
  * @param fuelPerItem  ticks que suma cada unidad de combustible, de 0 a {@code maxFuel}
- * @param engineVolume volumen del motor, de 0 (apagado) a 1
  */
-public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, VehicleTuning tuning, RunOverRules runOver) {
+public record GarageConfig(int maxFuel, int fuelPerItem, VehicleTuning tuning, RunOverRules runOver) {
 
     /** Tope de {@code maxFuel} (ticks, unas 14 h de acelerador): mantiene los cálculos de nivel dentro de {@code int}. */
     public static final int MAX_FUEL_LIMIT = 1_000_000;
@@ -48,7 +45,7 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
     /** Tope de la fuerza del empuje. */
     public static final double KNOCKBACK_LIMIT = 10.0;
 
-    public static final GarageConfig DEFAULT = new GarageConfig(12000, 1600, 0.6F, VehicleTuning.WILLYS,
+    public static final GarageConfig DEFAULT = new GarageConfig(12000, 1600, VehicleTuning.WILLYS,
             new RunOverRules(true, 0.1, 0.25, 25.0, 1.2, false));
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -56,6 +53,7 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
     // Se escribe una sola vez al arrancar (load); el resto del tiempo solo se lee. Lo que el cliente recibe del
     // servidor vive aparte, en SyncedTunings, para que el cliente nunca pise la config del servidor integrado.
     private static volatile GarageConfig current = DEFAULT;
+    private static volatile Float legacyEngineVolume;
 
     public static GarageConfig get() {
         return current;
@@ -67,6 +65,7 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
     }
 
     public static void load(Path file) {
+        legacyEngineVolume = null;
         JsonObject merged = GSON.toJsonTree(DEFAULT).getAsJsonObject();
         GarageConfig parsed;
         try {
@@ -80,7 +79,9 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
                     return;
                 }
                 try {
-                    mergeInto(merged, JsonParser.parseString(text).getAsJsonObject());
+                    JsonObject user = JsonParser.parseString(text).getAsJsonObject();
+                    captureLegacyEngineVolume(user);
+                    mergeInto(merged, user);
                     saturateInt(merged, "maxFuel");
                     saturateInt(merged, "fuelPerItem");
                     parsed = GSON.fromJson(merged, GarageConfig.class);
@@ -107,13 +108,11 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
     /** Archivo corrupto: se conserva como {@code .bak} para que el jugador lo recupere y se crea uno nuevo. */
     private static void backUpAndRegenerate(Path file, Exception cause) {
         current = DEFAULT;
-        Path backup = file.resolveSibling(file.getFileName() + ".bak");
-        try {
-            Files.move(file, backup, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
+        Path backup = ConfigFiles.backUp(file);
+        if (backup == null) {
             // Sin copia de seguridad no se sobrescribe el original
-            GarageMod.LOGGER.warn("{} no es válido ({}) y no se pudo guardar como {}; se usan los valores por defecto: {}",
-                    file, cause.getMessage(), backup, e.toString());
+            GarageMod.LOGGER.warn("{} no es válido ({}) y no se pudo guardar una copia; se usan los valores por defecto",
+                    file, cause.getMessage());
             return;
         }
         GarageMod.LOGGER.warn("{} no es válido ({}); se guardó como {} y se creó uno nuevo con los valores por defecto",
@@ -121,16 +120,9 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
         write(file, DEFAULT);
     }
 
-    /** Escribe en un archivo temporal y lo mueve de golpe, para que un corte no deje la config a medias. */
     private static void write(Path file, GarageConfig config) {
-        Path temp = file.resolveSibling(file.getFileName() + ".tmp");
         try {
-            Files.writeString(temp, GSON.toJson(config));
-            try {
-                Files.move(temp, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-            } catch (AtomicMoveNotSupportedException e) {
-                Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING);
-            }
+            ConfigFiles.writeAtomic(file, GSON.toJson(config));
         } catch (IOException e) {
             GarageMod.LOGGER.warn("No se pudo escribir {}: {}", file, e.toString());
         }
@@ -164,9 +156,7 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
 
         int maxFuel = (int) clamp("maxFuel", config.maxFuel(), 1, MAX_FUEL_LIMIT, DEFAULT.maxFuel(), fixes);
         int fuelPerItem = (int) clamp("fuelPerItem", config.fuelPerItem(), 0, maxFuel, DEFAULT.fuelPerItem(), fixes);
-        float engineVolume = (float) clamp("engineVolume", config.engineVolume(), 0.0, 1.0,
-                DEFAULT.engineVolume(), fixes);
-        return new GarageConfig(maxFuel, fuelPerItem, engineVolume, tuning, runOver);
+        return new GarageConfig(maxFuel, fuelPerItem, tuning, runOver);
     }
 
     private static double clamp(String key, double value, double min, double max, double fallback, List<String> fixes) {
@@ -186,6 +176,18 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
         JsonElement element = json.get(key);
         if (element != null && element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber()) {
             json.addProperty(key, (int) Math.clamp(element.getAsDouble(), Integer.MIN_VALUE, Integer.MAX_VALUE));
+        }
+    }
+
+    /** El {@code engineVolume} que este archivo tenía antes de pasar a {@link ClientConfig}, o {@code null}. */
+    public static Float legacyEngineVolume() {
+        return legacyEngineVolume;
+    }
+
+    private static void captureLegacyEngineVolume(JsonObject user) {
+        JsonElement legacy = user.get("engineVolume");
+        if (legacy != null && legacy.isJsonPrimitive() && legacy.getAsJsonPrimitive().isNumber()) {
+            legacyEngineVolume = legacy.getAsFloat();
         }
     }
 

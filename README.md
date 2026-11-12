@@ -62,7 +62,6 @@ Las velocidades van en bloques/tick (1 b/t = 72 km/h) y los factores son lo que 
 |---|---|---|---|
 | `maxFuel` | 12000 | 1 a 1 000 000 | Ticks de acelerador con el tanque lleno |
 | `fuelPerItem` | 1600 | 0 a `maxFuel` | Ticks que suma cada carbón |
-| `engineVolume` | 0.6 | 0 a 1 | Volumen del motor (0 lo apaga) |
 | `tuning.maxSpeed` / `maxReverse` | 0.6 / 0.2 | mayor que 0, hasta 3 | Velocidad máxima hacia adelante / en reversa (b/t) |
 | `tuning.accel` / `reverseAccel` | 0.03 / 0.02 | mayor que 0, hasta 1 | Aceleración al arrancar (se suaviza al acercarse al máximo) |
 | `tuning.brake` / `handbrake` | 0.04 / 0.035 | 0 a 1 | Velocidad que quita por tick el freno / el freno de mano |
@@ -80,6 +79,18 @@ Las velocidades van en bloques/tick (1 b/t = 72 km/h) y los factores son lo que 
 | `runOver.damagePerSpeed` | 25.0 | 0 a 1000 | Daño por cada b/t por encima de `damageSpeed` (a tope: 8.75, unos 4 corazones) |
 | `runOver.knockback` | 1.2 | 0 a 10 | Fuerza del empuje a velocidad máxima |
 | `runOver.hurtPlayers` | false | true / false | Lastimar también a otros jugadores |
+
+### Config del cliente
+
+`config/garage-client.json` solo la lee el cliente (el servidor dedicado no la toca) y no se sincroniza. Sigue las
+mismas reglas de validación y copia de seguridad que `garage.json`.
+
+| Clave | Por defecto | Rango | Qué hace |
+|---|---|---|---|
+| `engineVolume` | 0.6 | 0 a 1 | Volumen del motor (0 lo apaga) |
+
+`engineVolume` vivía en `garage.json`: la primera vez que se abre el juego, el valor que tuvieras allí se copia a este
+archivo.
 
 El servidor calcula los atropellos con la velocidad que mide entre dos ticks, limitada a la `maxSpeed` del vehículo,
 así que un cliente alterado no consigue más daño ni empuje del que permite el manejo.
@@ -111,7 +122,7 @@ movimiento observado, así que se ven igual para todos sin paquetes extra.
 | `physics/VehicleMath` | Funciones puras de la entidad: rumbo, giro directo, salida, empuje, rodado, dirección visual y combustible |
 | `physics/VehicleTuning`, `VehicleInput` | Parámetros de un vehículo (`WILLYS`, `ENDURO`, `MOTOCARRO`, `MOTOCARGUERO`) con sus límites, y entrada inmutable del conductor |
 | `physics/Suspension` | Resortes del cabeceo, el balanceo y el rebote (solo visual) |
-| `config/GarageConfig` | Lee, completa, valida y respalda `config/garage.json` |
+| `config/GarageConfig`, `ClientConfig` | Leen, completan, validan y respaldan `config/garage.json` (servidor) y `config/garage-client.json` (cliente); `ConfigFiles` aporta la copia `.bak` y la escritura atómica |
 | `network/HornPayload`, `TuningSyncPayload` | Paquetes: bocina (cliente → servidor) y manejo de cada vehículo (servidor → cliente, al conectar) |
 | `network/SyncedTunings` | Manejo recibido del servidor, por id de vehículo; solo lo escribe y lo lee el cliente |
 | `client/GarageClient` | Teclas del conductor, bocina, recepción del manejo y arranque del sonido del motor |
