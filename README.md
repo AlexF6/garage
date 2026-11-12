@@ -112,9 +112,11 @@ movimiento observado, así que se ven igual para todos sin paquetes extra.
 | `physics/VehicleTuning`, `VehicleInput` | Parámetros de un vehículo (`WILLYS`, `ENDURO`, `MOTOCARRO`) con sus límites, y entrada inmutable del conductor |
 | `physics/Suspension` | Resortes del cabeceo, el balanceo y el rebote (solo visual) |
 | `GarageConfig` | Lee, completa, valida y respalda `config/garage.json` |
-| `HornPayload`, `TuningSyncPayload` | Paquetes: bocina (cliente → servidor) y manejo del Jeep (servidor → cliente, al conectar) |
+| `HornPayload`, `TuningSyncPayload` | Paquetes: bocina (cliente → servidor) y manejo de cada vehículo (servidor → cliente, al conectar) |
+| `SyncedTunings` | Manejo recibido del servidor, por id de vehículo; solo lo escribe y lo lee el cliente |
 | `client/GarageClient` | Teclas del conductor, bocina, recepción del manejo y arranque del sonido del motor |
 | `client/ClientVehicles`, `VehicleRenderer` | Tabla de modelos por vehículo y renderer común (carrocería teñida + resto sin teñir) |
+| `client/ModelKit` | Atajos comunes de los modelos: capas, cubos, piezas opcionales, ruedas y suspensión |
 | `client/CarModels` | Modelo del Jeep en dos capas, ruedas, suspensión y bandera |
 | `client/MotorcycleModels` | Modelo de la moto XTZ en dos capas, horquilla inclinada (rake), ruedas y tumbada (lean) |
 | `client/MotocarroModels` | Modelo del motocarro en dos capas, tren delantero Delta, suspensión y balanceo centrífugo |
@@ -123,7 +125,8 @@ movimiento observado, así que se ven igual para todos sin paquetes extra.
 
 Para agregar otro vehículo:
 
-1. Un `VehicleTuning` nuevo en `physics/` (o reutilizar uno) y una entrada en `VehicleSpecs` (incluida en `ALL`).
+1. Un `VehicleTuning` nuevo en `physics/` (o reutilizar uno) y una entrada en `VehicleSpecs` con `VehicleSpec.builder`
+   (incluida en `ALL`). La `y` de cada asiento es la parte de arriba del cojín: más baja, el jugador se hunde.
 2. Su modelo (`*Models` con las capas `BODY` y `TRIM`) y una entrada en `client/ClientVehicles`.
 3. Datos: textura de entidad, textura e `items/*.json` e ítem, receta y claves de `lang/` en los tres idiomas.
 

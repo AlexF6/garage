@@ -11,7 +11,8 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 
 ### Changed
 - Un solo `MotorVehicleEntity` para todos los vehículos, descrito por un `VehicleSpec` (`VehicleSpecs`): añadir uno ya no obliga a tocar el registro, el ítem ni el arranque del cliente. `MotorcycleEntity` y `MotocarroEntity` desaparecen; los identificadores de entidad, ítem y config no cambian, así que las partidas guardadas siguen funcionando.
-- Un solo `VehicleRenderer` (con `ClientVehicles`) en lugar de tres renderers casi idénticos.
+- Un solo `VehicleRenderer` (con `ClientVehicles`) en lugar de tres renderers casi idénticos; los modelos comparten atajos en `ModelKit`.
+- Los vehículos se declaran con `VehicleSpec.builder`, que nombra cada dato en lugar de un constructor de 14 números seguidos.
 - Los registros pasan a `ModVehicles.register()`, llamado desde `onInitialize`.
 - `CarEntity`, `CarItem`, `CarConfig` y `CarEngineSound` pasan a llamarse `MotorVehicleEntity`, `VehicleItem`, `GarageConfig` y `EngineSound` porque sirven a todos los vehículos.
 - `VehiclePhysics`, `VehicleTuning` y `VehicleInput` (antes `Car*`) y el baúl (`ChestVehicleEntity`) salen de la entidad; el registro de renderers usa `EntityRenderers`, sin la API obsoleta de Fabric.
@@ -22,6 +23,7 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 - El tope de velocidad del atropello vive en `RunOverMath`, probado, y `VehicleTuning` se serializa con `toArray`/`fromArray`.
 
 ### Fixed
+- Los jugadores de la moto se sientan sobre el sillín: el anclaje estaba 0.4 bloques por debajo y quedaban hundidos en el motor.
 - Un `garage.json` con bytes que no son UTF-8 se trata como corrupto (`.bak` y regeneración), y la config se escribe de forma atómica.
 - El servidor decide si el tanque está lleno al repostar; el cliente ya no lo adivina con su config local.
 - Un `garage.json` corrupto ahora se guarda como `garage.json.bak` y se regenera con los valores por defecto, en lugar de dejarlo intacto y jugar sin avisar.
@@ -31,7 +33,7 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 - `VehicleTuning` rechaza valores por encima de límites razonables (velocidad, aceleración, distancia entre ejes, etc.) y NaN.
 - El servidor acota la velocidad medida en los atropellos a la `maxSpeed` del vehículo, y su zona de búsqueda con ella.
 - Un atropello con `pushSpeed` en 0 y el vehículo parado ya no genera una dirección NaN.
-- El `tuning` del Jeep lo manda el servidor al conectar (`TuningSyncPayload`) y el cliente deja de usar el suyo.
+- El manejo de cada vehículo lo manda el servidor al conectar (`TuningSyncPayload`) y el cliente deja de usar el suyo. Lo recibido vive en `SyncedTunings`, que solo usa el cliente, así que en un mundo integrado el servidor nunca lee lo que recibió su cliente.
 - Cada vehículo suelta su propio ítem (`getDropItem` ya no cae por defecto en el Jeep).
 - Un vehículo aparcado (sin conductor, en el suelo y quieto) solo recalcula su física cada 10 ticks, que basta para detectar que le quitaron el suelo.
 - El servidor ya no calcula animaciones (ruedas, dirección, inclinación) que solo se ven en el cliente.
