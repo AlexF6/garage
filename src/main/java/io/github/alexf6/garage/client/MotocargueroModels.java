@@ -40,13 +40,7 @@ public final class MotocargueroModels {
     /** Inclinación (rake) de la horquilla delantera de carga: -13° (-0.22 rad) hacia el frente (-Z). */
     private static final float FORK_RAKE = -0.22F;
 
-    // Ralentí: vibración del monocilíndrico 200cc con el motor encendido y casi detenido
-    private static final float IDLE_SPEED_RATIO = 0.05F;
-    private static final float IDLE_BUZZ_SPEED = 1.5F;
-    private static final float IDLE_BUZZ_AMPLITUDE = 0.02F;
-    private static final float IDLE_BOB_SPEED = 3.0F;
-    private static final float IDLE_BOB_AMPLITUDE_PX = 0.10F;
-    private static final float IDLE_PITCH_SHARE = 0.4F;
+    private static final ModelKit.IdleVibration IDLE = new ModelKit.IdleVibration(1.5F, 0.02F, 3.0F, 0.10F, 0.4F);
     private static final float IDLE_ROLL_SHARE = 0.5F;
     /** Balanceo centrífugo hacia el exterior de la curva en virajes rápidos. */
     private static final float BODY_ROLL_AT_FULL_STEER = 0.18F;
@@ -292,10 +286,10 @@ public final class MotocargueroModels {
 
             // Suspensión, ralentí y balanceo centrífugo de triciclo delta
             float heavePx = ModelKit.heavePx(state.bodyHeave);
-            if (state.isEngineRunning && state.speedRatio < IDLE_SPEED_RATIO) {
-                float idleBuzz = Mth.sin(state.ageInTicks * IDLE_BUZZ_SPEED) * IDLE_BUZZ_AMPLITUDE;
-                this.chassis.y = 24.0F + heavePx + (Mth.cos(state.ageInTicks * IDLE_BOB_SPEED) * IDLE_BOB_AMPLITUDE_PX);
-                this.chassis.xRot = state.bodyPitch + idleBuzz * IDLE_PITCH_SHARE;
+            if (state.isEngineRunning && state.speedRatio < ModelKit.IDLE_SPEED_RATIO) {
+                float idleBuzz = IDLE.sway(state.ageInTicks);
+                this.chassis.y = 24.0F + heavePx + IDLE.bobPx(state.ageInTicks);
+                this.chassis.xRot = state.bodyPitch + idleBuzz * IDLE.pitchShare();
                 this.chassis.zRot = idleBuzz * IDLE_ROLL_SHARE;
             } else {
                 this.chassis.y = 24.0F + heavePx;

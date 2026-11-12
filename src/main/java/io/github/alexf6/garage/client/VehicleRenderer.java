@@ -1,6 +1,7 @@
 package io.github.alexf6.garage.client;
 
 import io.github.alexf6.garage.MotorVehicleEntity;
+import io.github.alexf6.garage.physics.Suspension;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.EntityModel;
@@ -59,9 +60,10 @@ public class VehicleRenderer extends EntityRenderer<MotorVehicleEntity, VehicleR
         state.wheelRoll = vehicle.getWheelRoll(partialTick);
         state.steer = vehicle.getSteer(partialTick);
         state.lean = vehicle.getLean(partialTick);
-        state.bodyPitch = vehicle.getSuspension().pitch(partialTick);
-        state.bodyRoll = vehicle.getSuspension().roll(partialTick);
-        state.bodyHeave = vehicle.getSuspension().heave(partialTick);
+        Suspension suspension = vehicle.getSuspension();
+        state.bodyPitch = suspension.pitch(partialTick);
+        state.bodyRoll = suspension.roll(partialTick);
+        state.bodyHeave = suspension.heave(partialTick);
         state.isEngineRunning = vehicle.isEngineRunning();
         state.speedRatio = (float) vehicle.speedRatio();
     }

@@ -7,6 +7,10 @@ package io.github.alexf6.garage.physics;
 public final class VehiclePhysics {
 
     private static final double STOP_EPSILON = 0.003;
+    /** Cuánto más rápido vuelve el volante al centro al soltar las teclas, respecto a {@code steerRate}. */
+    private static final double STEER_RETURN_BOOST = 1.8;
+    /** Peso de {@code grip} frente a {@code airDrag} (0.5 = mitad y mitad) en la velocidad lateral en el aire. */
+    private static final double AIR_GRIP_BLEND = 0.5;
 
     /** Nueva velocidad longitudinal (signo = sentido respecto al frente del carro). */
     public static double nextSpeed(double speed, VehicleInput input, boolean fuelled, boolean onGround,
@@ -40,7 +44,7 @@ public final class VehiclePhysics {
         double ratio = Math.min(Math.abs(speed) / t.maxSpeed(), 1.0);
         double maxSteer = t.maxSteerLow() + (t.maxSteerHigh() - t.maxSteerLow()) * ratio;
         double target = input.steering() * maxSteer;
-        double rate = input.steering() == 0 ? t.steerRate() * 1.8 : t.steerRate();
+        double rate = input.steering() == 0 ? t.steerRate() * STEER_RETURN_BOOST : t.steerRate();
         return steer + clamp(target - steer, -rate, rate);
     }
 
@@ -52,7 +56,7 @@ public final class VehiclePhysics {
     public static double nextLateral(double lateral, VehicleInput input, boolean onGround, boolean inWater, VehicleTuning t) {
         double v;
         if (inWater) v = lateral * t.waterDrag();
-        else if (!onGround) v = lateral * ((t.grip() + t.airDrag()) * 0.5);
+        else if (!onGround) v = lateral * ((t.grip() + t.airDrag()) * AIR_GRIP_BLEND);
         else v = lateral * (input.brake() ? t.driftGrip() : t.grip());
         return Math.abs(v) < STOP_EPSILON ? 0.0 : v;
     }

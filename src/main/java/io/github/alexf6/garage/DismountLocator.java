@@ -14,8 +14,11 @@ import net.minecraft.world.phys.Vec3;
  */
 final class DismountLocator {
 
+    /** Por dónde baja el pasajero y con qué postura; quien lo llama es quien se la aplica. */
+    record Exit(Vec3 spot, Pose pose) {}
+
     /** Punto libre por el que bajar, o {@code null} si ningún lado sirve (se usa entonces el comportamiento vanilla). */
-    static Vec3 find(MotorVehicleEntity vehicle, LivingEntity passenger) {
+    static Exit find(MotorVehicleEntity vehicle, LivingEntity passenger) {
         Vec3 center = vehicle.position();
         Vec3 forward = Vec3.directionFromRotation(0.0F, vehicle.getYRot());
         Vec3 left = new Vec3(forward.z, 0.0, -forward.x); // el +X del modelo (lado del conductor)
@@ -29,14 +32,14 @@ final class DismountLocator {
             Vec3 from = seat.subtract(center);
             Vec3 dir = left.scale(s);
             VehicleMath.Planar exit = VehicleMath.exitPoint(from.x, from.z, dir.x, dir.z, reach);
-            Vec3 spot = findSpot(vehicle, passenger, new Vec3(center.x + exit.x(), vehicle.getY(), center.z + exit.z()));
-            if (spot != null) return spot;
+            Exit found = findSpot(vehicle, passenger, new Vec3(center.x + exit.x(), vehicle.getY(), center.z + exit.z()));
+            if (found != null) return found;
         }
         return null;
     }
 
     /** Suelo válido y espacio libre en (x, z): al nivel del vehículo, un bloque arriba o uno abajo. */
-    private static Vec3 findSpot(MotorVehicleEntity vehicle, LivingEntity passenger, Vec3 at) {
+    private static Exit findSpot(MotorVehicleEntity vehicle, LivingEntity passenger, Vec3 at) {
         BlockPos base = BlockPos.containing(at.x, vehicle.getY(), at.z);
         for (BlockPos pos : new BlockPos[] {base, base.above(), base.below()}) {
             double floor = vehicle.level().getBlockFloorHeight(pos);
@@ -44,8 +47,7 @@ final class DismountLocator {
             Vec3 spot = new Vec3(at.x, pos.getY() + floor, at.z);
             for (Pose pose : passenger.getDismountPoses()) {
                 if (DismountHelper.canDismountTo(vehicle.level(), spot, passenger, pose)) {
-                    passenger.setPose(pose);
-                    return spot;
+                    return new Exit(spot, pose);
                 }
             }
         }

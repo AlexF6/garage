@@ -25,17 +25,12 @@ public final class MotocarroModels {
     public static final ModelLayerLocation TRIM = layer("trim");
 
     public static final String[] WHEELS = {"wheel_front", "wheel_bl", "wheel_br"};
+    // Ralentí: la vibración se reparte entre el balanceo lateral (zRot) y el cabeceo
+    private static final ModelKit.IdleVibration IDLE = new ModelKit.IdleVibration(1.6F, 0.02F, 3.2F, 0.12F, 0.5F);
     private static final int FRONT_WHEELS = 1; // las primeras de WHEELS: la delantera gira con el manillar
     private static final String CHASSIS = "chassis";
     private static final String STEERING = "steering";
 
-    // Ralentí: vibración solo con el motor encendido y casi detenido
-    private static final float IDLE_SPEED_RATIO = 0.05F;     // por debajo de esta fracción de la velocidad máxima
-    private static final float IDLE_BUZZ_SPEED = 1.6F;       // rad por tick de edad
-    private static final float IDLE_BUZZ_AMPLITUDE = 0.02F;  // rad de la vibración lateral
-    private static final float IDLE_BOB_SPEED = 3.2F;        // rad por tick de edad
-    private static final float IDLE_BOB_AMPLITUDE_PX = 0.12F; // píxeles del temblor vertical
-    private static final float IDLE_PITCH_SHARE = 0.5F;      // parte de la vibración que pasa al cabeceo
     /** Balanceo (rad) hacia fuera de la curva con la dirección y la velocidad al máximo; crece con la velocidad². */
     private static final float BODY_ROLL_AT_FULL_STEER = 0.22F;
 
@@ -184,10 +179,10 @@ public final class MotocarroModels {
 
             // Suspensión, ralentí (solo con motor encendido) y balanceo centrífugo hacia el exterior de la curva
             float heavePx = ModelKit.heavePx(state.bodyHeave);
-            if (state.isEngineRunning && state.speedRatio < IDLE_SPEED_RATIO) {
-                float idleBuzz = (float) Math.sin(state.ageInTicks * IDLE_BUZZ_SPEED) * IDLE_BUZZ_AMPLITUDE;
-                this.chassis.y = 24.0F + heavePx + ((float) Math.cos(state.ageInTicks * IDLE_BOB_SPEED) * IDLE_BOB_AMPLITUDE_PX);
-                this.chassis.xRot = state.bodyPitch + idleBuzz * IDLE_PITCH_SHARE;
+            if (state.isEngineRunning && state.speedRatio < ModelKit.IDLE_SPEED_RATIO) {
+                float idleBuzz = IDLE.sway(state.ageInTicks);
+                this.chassis.y = 24.0F + heavePx + IDLE.bobPx(state.ageInTicks);
+                this.chassis.xRot = state.bodyPitch + idleBuzz * IDLE.pitchShare();
                 this.chassis.zRot = idleBuzz;
             } else {
                 this.chassis.y = 24.0F + heavePx;

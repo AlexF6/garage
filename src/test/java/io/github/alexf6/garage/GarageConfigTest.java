@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.alexf6.garage.physics.RunOverRules;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -139,7 +140,7 @@ class GarageConfigTest {
     void sanitizeAnotaCadaCorreccion() {
         List<String> fixes = new ArrayList<>();
         GarageConfig raw = new GarageConfig(0, -3, Float.NaN, GarageConfig.DEFAULT.tuning(),
-                new GarageConfig.RunOver(true, 99.0, 0.0, 5000.0, -1.0, false));
+                new RunOverRules(true, 99.0, 0.0, 5000.0, -1.0, false));
         GarageConfig fixed = GarageConfig.sanitize(raw, fixes);
         assertEquals(1, fixed.maxFuel());
         assertEquals(0, fixed.fuelPerItem());
@@ -163,7 +164,7 @@ class GarageConfigTest {
         Path file = dir.resolve("garage.json");
         Files.writeString(file, "{\"runOver\": {\"pushSpeed\": -1.0, \"damageSpeed\": -2.0, \"damagePerSpeed\": -5.0, \"knockback\": 99.0}}");
         GarageConfig.load(file);
-        GarageConfig.RunOver r = GarageConfig.get().runOver();
+        RunOverRules r = GarageConfig.get().runOver();
         assertEquals(0.0, r.pushSpeed());
         assertEquals(0.0, r.damageSpeed());
         assertEquals(0.0, r.damagePerSpeed());

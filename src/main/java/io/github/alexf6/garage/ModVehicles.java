@@ -54,8 +54,8 @@ public final class ModVehicles {
     }
 
     /** Ítem de un vehículo que conserva el color de la carrocería (componente vanilla dyed_color). */
-    public static ItemStack stack(Item item, VehicleSpec spec, int rgb) {
-        ItemStack stack = new ItemStack(item);
+    public static ItemStack stack(VehicleSpec spec, int rgb) {
+        ItemStack stack = new ItemStack(item(spec));
         if (rgb != spec.defaultColor()) {
             stack.set(DataComponents.DYED_COLOR, new DyedItemColor(rgb));
         }

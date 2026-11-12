@@ -37,13 +37,9 @@ public final class MotorcycleModels {
     private static final String SWINGARM = "swingarm";
     private static final String REAR_WHEEL = "rear_wheel";
 
-    // Ralentí del monocilíndrico: se mueve solo con el motor encendido y casi detenida
-    private static final float IDLE_SPEED_RATIO = 0.05F;     // por debajo de esta fracción de la velocidad máxima
-    private static final float IDLE_SWAY_SPEED = 1.4F;       // rad por tick de edad
-    private static final float IDLE_SWAY_AMPLITUDE = 0.02F;  // rad del vaivén lateral
-    private static final float IDLE_BOB_SPEED = 2.8F;        // rad por tick de edad
-    private static final float IDLE_BOB_AMPLITUDE_PX = 0.08F; // píxeles del temblor vertical
-    private static final float IDLE_PITCH_SHARE = 0.4F;      // parte del vaivén que pasa al cabeceo
+    // Ralentí del monocilíndrico: el vaivén gira el chasis (yRot) y parte pasa al cabeceo
+    private static final ModelKit.IdleVibration IDLE = new ModelKit.IdleVibration(1.4F, 0.02F, 2.8F, 0.08F, 0.4F);
+
 
     /** Ángulo de avance (rake) de la horquilla Enduro: -24° (-0.42 rad), inclina las barras hacia adelante (-Z). */
     private static final float FORK_RAKE = -0.42F;
@@ -244,11 +240,11 @@ public final class MotorcycleModels {
 
             // b) Suspensión de largo recorrido (hunde la horquilla delantera al frenar) y ralentí monocilíndrico 4T
             float heavePx = ModelKit.heavePx(state.bodyHeave);
-            if (state.isEngineRunning && state.speedRatio < IDLE_SPEED_RATIO) {
-                float idle = Mth.sin(state.ageInTicks * IDLE_SWAY_SPEED) * IDLE_SWAY_AMPLITUDE;
-                this.chassis.y = heavePx + (Mth.cos(state.ageInTicks * IDLE_BOB_SPEED) * IDLE_BOB_AMPLITUDE_PX);
+            if (state.isEngineRunning && state.speedRatio < ModelKit.IDLE_SPEED_RATIO) {
+                float idle = IDLE.sway(state.ageInTicks);
+                this.chassis.y = heavePx + IDLE.bobPx(state.ageInTicks);
                 this.chassis.yRot = idle;
-                this.chassis.xRot = state.bodyPitch + idle * IDLE_PITCH_SHARE;
+                this.chassis.xRot = state.bodyPitch + idle * IDLE.pitchShare();
             } else {
                 this.chassis.y = heavePx;
                 this.chassis.yRot = 0.0F;

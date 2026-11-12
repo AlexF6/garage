@@ -1,6 +1,7 @@
 package io.github.alexf6.garage;
 
 import io.github.alexf6.garage.physics.RunOverMath;
+import io.github.alexf6.garage.physics.RunOverRules;
 import io.github.alexf6.garage.physics.VehicleMath;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -9,7 +10,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 /**
  * Aparta (y desde cierta velocidad lastima) a las criaturas que el vehículo tiene delante. Va en el servidor
@@ -21,22 +21,28 @@ import net.minecraft.world.phys.Vec3;
  */
 final class RunOverPusher {
 
-    private Vec3 lastPos;
+    private double lastX;
+    private double lastZ;
+    private boolean hasLast;
 
     void tick(ServerLevel level, MotorVehicleEntity vehicle, LivingEntity driver) {
-        Vec3 pos = vehicle.position();
-        Vec3 motion = lastPos == null ? Vec3.ZERO : pos.subtract(lastPos);
-        lastPos = pos;
+        double x = vehicle.getX();
+        double z = vehicle.getZ();
+        double dx = hasLast ? x - lastX : 0.0;
+        double dz = hasLast ? z - lastZ : 0.0;
+        lastX = x;
+        lastZ = z;
+        hasLast = true;
 
-        GarageConfig.RunOver config = GarageConfig.get().runOver();
-        if (!config.enabled()) return;
-        double distance = motion.horizontalDistance();
-        RunOverMath.Impact impact = RunOverMath.impact(distance, vehicle.tuning().maxSpeed(), config.pushSpeed(),
-                config.damageSpeed(), config.damagePerSpeed(), config.knockback());
+        // Sin objetos nuevos mientras está quieto: solo se crean cuando hay a quién apartar
+        RunOverRules rules = GarageConfig.get().runOver();
+        double distance = Math.hypot(dx, dz);
+        if (!rules.enabled() || distance <= 0.0) return;
+        RunOverMath.Impact impact = RunOverMath.impact(distance, vehicle.tuning().maxSpeed(), rules);
         if (impact.isNone()) return;
 
-        double dirX = motion.x / distance;
-        double dirZ = motion.z / distance;
+        double dirX = dx / distance;
+        double dirZ = dz / distance;
         float damage = impact.damage();
         AABB zone = vehicle.getBoundingBox()
                 .expandTowards(dirX * impact.speed(), 0.0, dirZ * impact.speed()).inflate(0.1, 0.0, 0.1);
@@ -44,10 +50,10 @@ final class RunOverPusher {
 
         for (Entity entity : level.getEntities(vehicle, zone, RunOverPusher::canBeRunOver)) {
             LivingEntity victim = (LivingEntity) entity;
-            boolean hurts = damage > 0 && (config.hurtPlayers() || !(victim instanceof Player));
+            boolean hurts = damage > 0 && (rules.hurtPlayers() || !(victim instanceof Player));
             if (hurts) victim.hurtServer(level, source, damage);
             VehicleMath.Planar push = VehicleMath.pushDirection(
-                    dirX, dirZ, victim.getX() - pos.x, victim.getZ() - pos.z);
+                    dirX, dirZ, victim.getX() - x, victim.getZ() - z);
             victim.knockback(impact.strength(), -push.x(), -push.z(), source, hurts ? damage : 0.0F);
         }
     }

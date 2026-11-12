@@ -39,8 +39,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Vehículo motorizado: una sola clase para el Jeep, la moto y el motocarro; lo que cambia de uno a otro lo
- * dicta su {@link VehicleSpec}. Sigue el patrón del bote vanilla: el cliente del conductor calcula la física y
+ * Vehículo motorizado: una sola clase para todos los vehículos del mod (el Jeep, la moto, el motocarro y el
+ * motocarguero); lo que cambia de uno a otro lo dicta su {@link VehicleSpec}. Sigue el patrón del bote vanilla: el cliente del conductor calcula la física y
  * el servidor recibe la posición; el combustible y el color viven en el servidor y se sincronizan.
  */
 public class MotorVehicleEntity extends ChestVehicleEntity {
@@ -376,7 +376,7 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
 
     @Override
     public ItemStack getPickResult() {
-        return ModVehicles.stack(getDropItem(), spec, getColor());
+        return ModVehicles.stack(spec, getColor());
     }
 
     /** Igual que VehicleEntity.destroy, pero el item soltado conserva el color. */
@@ -384,7 +384,7 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
     public void destroy(ServerLevel level, Item item) {
         kill(level);
         if (level.getGameRules().get(GameRules.ENTITY_DROPS)) {
-            ItemStack stack = ModVehicles.stack(item, spec, getColor());
+            ItemStack stack = ModVehicles.stack(spec, getColor());
             stack.set(DataComponents.CUSTOM_NAME, getCustomName());
             spawnAtLocation(level, stack);
         }
@@ -477,8 +477,10 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
 
     @Override
     public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
-        Vec3 spot = DismountLocator.find(this, passenger);
-        return spot != null ? spot : super.getDismountLocationForPassenger(passenger);
+        DismountLocator.Exit exit = DismountLocator.find(this, passenger);
+        if (exit == null) return super.getDismountLocationForPassenger(passenger);
+        passenger.setPose(exit.pose());
+        return exit.spot();
     }
 
     // --- Bocina ----------------------------------------------------------------------------

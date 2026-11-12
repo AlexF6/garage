@@ -22,20 +22,16 @@ public final class RunOverMath {
     }
 
     /**
-     * @param distance      desplazamiento horizontal medido en el tick (bloques)
-     * @param maxSpeed      velocidad máxima del manejo del servidor (bloques/tick)
-     * @param pushSpeed     velocidad desde la que empuja
-     * @param damageSpeed   velocidad desde la que además lastima
-     * @param damagePerSpeed daño por cada bloque/tick por encima de {@code damageSpeed}
-     * @param knockback     fuerza del empuje a velocidad máxima
+     * @param distance desplazamiento horizontal medido en el tick (bloques)
+     * @param maxSpeed velocidad máxima del manejo del servidor (bloques/tick)
+     * @param rules    umbrales, daño y empuje configurados
      */
-    public static Impact impact(double distance, double maxSpeed, double pushSpeed, double damageSpeed,
-                                double damagePerSpeed, double knockback) {
+    public static Impact impact(double distance, double maxSpeed, RunOverRules rules) {
         if (!(distance > 0.0) || !(maxSpeed > 0.0)) return Impact.NONE;
         double speed = Math.min(distance, maxSpeed);
-        if (speed < pushSpeed) return Impact.NONE;
-        double strength = knockback * VehicleMath.speedRatio(speed, maxSpeed);
-        float damage = (float) Math.max((speed - damageSpeed) * damagePerSpeed, 0.0);
+        if (speed < rules.pushSpeed()) return Impact.NONE;
+        double strength = rules.knockback() * VehicleMath.speedRatio(speed, maxSpeed);
+        float damage = (float) Math.max((speed - rules.damageSpeed()) * rules.damagePerSpeed(), 0.0);
         return new Impact(speed, strength, damage);
     }
 

@@ -27,7 +27,7 @@ final class ClientVehicles {
             VehicleSpecs.MOTOCARRO.id(), new Model(new VehicleRenderer.Look(texture("motocarro"), 0.75F,
                     MotocarroModels.BODY, MotocarroModels.TRIM, MotocarroModels.Part::new),
                     MotocarroModels::createBodyLayer, MotocarroModels::createTrimLayer),
-            "motocarguero", new Model(new VehicleRenderer.Look(texture("motocarguero"), 0.8F,
+            VehicleSpecs.MOTOCARGUERO.id(), new Model(new VehicleRenderer.Look(texture("motocarguero"), 0.8F,
                     MotocargueroModels.BODY, MotocargueroModels.TRIM, MotocargueroModels.Part::new),
                     MotocargueroModels::createBodyLayer, MotocargueroModels::createTrimLayer));
 

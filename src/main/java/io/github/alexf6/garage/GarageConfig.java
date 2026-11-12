@@ -1,5 +1,6 @@
 package io.github.alexf6.garage;
 
+import io.github.alexf6.garage.physics.RunOverRules;
 import io.github.alexf6.garage.physics.VehicleTuning;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -32,7 +33,7 @@ import java.util.Map;
  * @param fuelPerItem  ticks que suma cada unidad de combustible, de 0 a {@code maxFuel}
  * @param engineVolume volumen del motor, de 0 (apagado) a 1
  */
-public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, VehicleTuning tuning, RunOver runOver) {
+public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, VehicleTuning tuning, RunOverRules runOver) {
 
     /** Tope de {@code maxFuel} (ticks, unas 14 h de acelerador): mantiene los cálculos de nivel dentro de {@code int}. */
     public static final int MAX_FUEL_LIMIT = 1_000_000;
@@ -43,20 +44,8 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
     /** Tope de la fuerza del empuje. */
     public static final double KNOCKBACK_LIMIT = 10.0;
 
-    /**
-     * Atropello y empuje de criaturas, en bloques/tick (0.1 b/t = 7.2 km/h).
-     *
-     * @param pushSpeed      desde esta velocidad el carro aparta a las criaturas que tiene delante
-     * @param damageSpeed    desde esta velocidad además las lastima
-     * @param damagePerSpeed daño por cada bloque/tick por encima de {@code damageSpeed}
-     * @param knockback      fuerza del empuje a velocidad máxima
-     * @param hurtPlayers    si también lastima a otros jugadores (siempre los empuja)
-     */
-    public record RunOver(boolean enabled, double pushSpeed, double damageSpeed, double damagePerSpeed,
-                          double knockback, boolean hurtPlayers) {}
-
     public static final GarageConfig DEFAULT = new GarageConfig(12000, 1600, 0.6F, VehicleTuning.WILLYS,
-            new RunOver(true, 0.1, 0.25, 25.0, 1.2, false));
+            new RunOverRules(true, 0.1, 0.25, 25.0, 1.2, false));
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
@@ -154,7 +143,7 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
             fixes.add("tuning inválido (" + invalid + "); se usa el manejo por defecto");
             tuning = DEFAULT.tuning();
         }
-        RunOver r = config.runOver();
+        RunOverRules r = config.runOver();
         if (r == null) {
             fixes.add("falta la sección runOver; se usan los valores por defecto");
             r = DEFAULT.runOver();
@@ -167,7 +156,7 @@ public record GarageConfig(int maxFuel, int fuelPerItem, float engineVolume, Veh
                 DEFAULT.runOver().damagePerSpeed(), fixes);
         double knockback = clamp("runOver.knockback", r.knockback(), 0.0, KNOCKBACK_LIMIT,
                 DEFAULT.runOver().knockback(), fixes);
-        RunOver runOver = new RunOver(r.enabled(), pushSpeed, damageSpeed, damagePerSpeed, knockback, r.hurtPlayers());
+        RunOverRules runOver = new RunOverRules(r.enabled(), pushSpeed, damageSpeed, damagePerSpeed, knockback, r.hurtPlayers());
 
         int maxFuel = (int) clamp("maxFuel", config.maxFuel(), 1, MAX_FUEL_LIMIT, DEFAULT.maxFuel(), fixes);
         int fuelPerItem = (int) clamp("fuelPerItem", config.fuelPerItem(), 0, maxFuel, DEFAULT.fuelPerItem(), fixes);

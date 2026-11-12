@@ -14,8 +14,14 @@ class RunOverMathTest {
     private static final double PER_SPEED = 25.0;
     private static final double KNOCKBACK = 1.2;
 
+    private static final RunOverRules RULES = rules(PUSH, DAMAGE_FROM, PER_SPEED);
+
+    private static RunOverRules rules(double push, double damageFrom, double perSpeed) {
+        return new RunOverRules(true, push, damageFrom, perSpeed, KNOCKBACK, false);
+    }
+
     private static RunOverMath.Impact at(double distance) {
-        return RunOverMath.impact(distance, MAX, PUSH, DAMAGE_FROM, PER_SPEED, KNOCKBACK);
+        return RunOverMath.impact(distance, MAX, RULES);
     }
 
     @Test
@@ -51,20 +57,20 @@ class RunOverMathTest {
 
     @Test
     void conUmbralDeEmpujeEnCeroUnVehiculoParadoSigueSinEmpujar() {
-        assertSame(RunOverMath.Impact.NONE, RunOverMath.impact(0.0, MAX, 0.0, DAMAGE_FROM, PER_SPEED, KNOCKBACK));
-        assertEquals(0.01, RunOverMath.impact(0.01, MAX, 0.0, DAMAGE_FROM, PER_SPEED, KNOCKBACK).speed(), 1e-9);
+        assertSame(RunOverMath.Impact.NONE, RunOverMath.impact(0.0, MAX, rules(0.0, DAMAGE_FROM, PER_SPEED)));
+        assertEquals(0.01, RunOverMath.impact(0.01, MAX, rules(0.0, DAMAGE_FROM, PER_SPEED)).speed(), 1e-9);
     }
 
     @Test
     void valoresNoNumericosNoEmpujan() {
         assertSame(RunOverMath.Impact.NONE, at(Double.NaN));
         assertSame(RunOverMath.Impact.NONE,
-                RunOverMath.impact(0.3, Double.NaN, PUSH, DAMAGE_FROM, PER_SPEED, KNOCKBACK));
-        assertSame(RunOverMath.Impact.NONE, RunOverMath.impact(0.3, 0.0, PUSH, DAMAGE_FROM, PER_SPEED, KNOCKBACK));
+                RunOverMath.impact(0.3, Double.NaN, RULES));
+        assertSame(RunOverMath.Impact.NONE, RunOverMath.impact(0.3, 0.0, RULES));
     }
 
     @Test
     void sinDanoConfiguradoNuncaHayDano() {
-        assertEquals(0.0F, RunOverMath.impact(0.6, MAX, PUSH, DAMAGE_FROM, 0.0, KNOCKBACK).damage());
+        assertEquals(0.0F, RunOverMath.impact(0.6, MAX, rules(PUSH, DAMAGE_FROM, 0.0)).damage());
     }
 }

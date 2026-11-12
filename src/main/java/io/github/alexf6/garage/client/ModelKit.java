@@ -5,6 +5,7 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.util.Mth;
 import net.minecraft.resources.Identifier;
 
 /** Atajos comunes de los modelos de cubos de los vehículos. */
@@ -46,6 +47,29 @@ final class ModelKit {
             if (wheels[i] == null) continue;
             wheels[i].xRot = roll;
             wheels[i].yRot = i < steered ? steer : 0.0F;
+        }
+    }
+
+    /** Por debajo de esta fracción de la velocidad máxima el motor encendido "ralentiza" y el modelo vibra. */
+    static final float IDLE_SPEED_RATIO = 0.05F;
+
+    /**
+     * Vibración de ralentí de un motor: un vaivén (radianes) y un temblor vertical (píxeles) que dependen de la edad
+     * de la entidad. Cada modelo decide en qué ejes los aplica.
+     *
+     * @param swaySpeed       radianes por tick de edad del vaivén
+     * @param swayAmplitude   amplitud del vaivén (radianes)
+     * @param bobSpeed        radianes por tick de edad del temblor vertical
+     * @param bobAmplitudePx  amplitud del temblor vertical (píxeles del modelo)
+     * @param pitchShare      parte del vaivén que pasa al cabeceo del chasis
+     */
+    record IdleVibration(float swaySpeed, float swayAmplitude, float bobSpeed, float bobAmplitudePx, float pitchShare) {
+        float sway(float ageInTicks) {
+            return Mth.sin(ageInTicks * swaySpeed) * swayAmplitude;
+        }
+
+        float bobPx(float ageInTicks) {
+            return Mth.cos(ageInTicks * bobSpeed) * bobAmplitudePx;
         }
     }
 
