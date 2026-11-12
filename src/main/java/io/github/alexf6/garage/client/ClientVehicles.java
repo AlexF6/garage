@@ -17,19 +17,19 @@ final class ClientVehicles {
     /** Modelo de un vehículo: sus dos capas y cómo se animan. */
     record Model(VehicleRenderer.Look look, Supplier<LayerDefinition> bodyLayer, Supplier<LayerDefinition> trimLayer) {}
 
-    private static final Map<VehicleSpec, Model> MODELS = Map.of(
-            VehicleSpecs.CAR, new Model(new VehicleRenderer.Look(texture("car"), 0.9F,
+    private static final Map<String, Model> MODELS = Map.of(
+            VehicleSpecs.CAR.id(), new Model(new VehicleRenderer.Look(texture("car"), 0.9F,
                     CarModels.BODY, CarModels.TRIM, CarModels.Part::new),
                     CarModels::createBodyLayer, CarModels::createTrimLayer),
-            VehicleSpecs.MOTORCYCLE, new Model(new VehicleRenderer.Look(texture("motorcycle"), 0.5F,
+            VehicleSpecs.MOTORCYCLE.id(), new Model(new VehicleRenderer.Look(texture("motorcycle"), 0.5F,
                     MotorcycleModels.BODY, MotorcycleModels.TRIM, MotorcycleModels.Part::new),
                     MotorcycleModels::createBodyLayer, MotorcycleModels::createTrimLayer),
-            VehicleSpecs.MOTOCARRO, new Model(new VehicleRenderer.Look(texture("motocarro"), 0.75F,
+            VehicleSpecs.MOTOCARRO.id(), new Model(new VehicleRenderer.Look(texture("motocarro"), 0.75F,
                     MotocarroModels.BODY, MotocarroModels.TRIM, MotocarroModels.Part::new),
                     MotocarroModels::createBodyLayer, MotocarroModels::createTrimLayer));
 
     static Model lookOf(VehicleSpec spec) {
-        Model model = MODELS.get(spec);
+        Model model = MODELS.get(spec.id());
         if (model == null) {
             throw new IllegalStateException("Falta el modelo de cliente de " + spec.id() + " en ClientVehicles");
         }

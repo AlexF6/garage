@@ -404,13 +404,13 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
         ItemStack held = player.getItemInHand(hand);
 
         if (held.is(ItemTags.FURNACE_MINECART_FUEL)) {
+            // El tope del tanque es de la config del servidor: el cliente no lo adivina, solo balancea el brazo
+            if (level().isClientSide()) return InteractionResult.SUCCESS;
             if (getFuel() >= GarageConfig.get().maxFuel()) return InteractionResult.PASS;
-            if (!level().isClientSide()) {
-                setFuel(getFuel() + GarageConfig.get().fuelPerItem());
-                held.consume(1, player);
-                level().playSound(null, getX(), getY(), getZ(),
-                        SoundEvents.FIRECHARGE_USE, SoundSource.NEUTRAL, 0.8F, 1.0F);
-            }
+            setFuel(getFuel() + GarageConfig.get().fuelPerItem());
+            held.consume(1, player);
+            level().playSound(null, getX(), getY(), getZ(),
+                    SoundEvents.FIRECHARGE_USE, SoundSource.NEUTRAL, 0.8F, 1.0F);
             return InteractionResult.SUCCESS;
         }
 

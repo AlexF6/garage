@@ -14,8 +14,12 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 - El atropello y la salida de pasajeros salen de la entidad a `RunOverPusher` y `DismountLocator`; la matemática sin Minecraft, a `VehicleMath` (con pruebas).
 - `installMod` y `exportMod` ya no se enganchan a `assemble`: se ejecutan a mano. La versión de JUnit se mueve a `gradle.properties` y se añade `.editorconfig`.
 - El README documenta el rango de cada opción.
+- `VehicleSpec` valida sus datos al crearse y `ModVehicles` rechaza ids repetidos: un dato imposible detiene el arranque en lugar de dar un vehículo roto.
+- El tope de velocidad del atropello vive en `RunOverMath`, probado, y `VehicleTuning` se serializa con `toArray`/`fromArray`.
 
 ### Fixed
+- Un `garage.json` con bytes que no son UTF-8 se trata como corrupto (`.bak` y regeneración), y la config se escribe de forma atómica.
+- El servidor decide si el tanque está lleno al repostar; el cliente ya no lo adivina con su config local.
 - Un `garage.json` corrupto ahora se guarda como `garage.json.bak` y se regenera con los valores por defecto, en lugar de dejarlo intacto y jugar sin avisar.
 - Los valores fuera de rango (`maxFuel`, `fuelPerItem`, `engineVolume` y `runOver`) se corrigen **y se avisan en el log**.
 - `maxFuel` y `fuelPerItem` tienen tope (1 000 000): antes un valor enorme desbordaba el cálculo del porcentaje de combustible.
@@ -31,10 +35,10 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 ### Added
 - Motocarro urbano (Bajaj RE / "Torito") de 3 asientos (1 conductor + 2 pasajeros): configuración Delta de 3 ruedas, baúl de 18 casillas, carrocería teñible con tintes vanilla (blanco glaciar por defecto), lona de techo negra y receta de crafteo.
 - Física y cinemática del motocarro: balanceo centrífugo (*body roll*) hacia el exterior de las curvas, radio de giro cerrado, suspensión reactiva, vibración en ralentí con el motor encendido y bocina aguda.
-- Modelo nativo del motocarro en dos capas (`BODY` tintable y `TRIM` fija) con lienzo UV 256x256 (`MotocarroModels`, `MotocarroRenderer`).
+- Modelo nativo del motocarro en dos capas (`BODY` tintable y `TRIM` fija) con lienzo UV 256x256 (`MotocarroModels`).
 - Moto Enduro (Yamaha XTZ 125) de 2 asientos en tándem: tuning ágil `VehicleTuning.ENDURO`, inclinación lateral dinámica (*lean angle*) al doblar en curvas, alforja de 9 casillas, color teñible con tintes (azul Yamaha Racing Blue por defecto) y receta de crafteo.
-- Modelo 3D y renderizador nativo (`MotorcycleModels`, `MotorcycleRenderer`) en dos capas con horquilla inclinada (*rake* -24°), ruedas de radios (rin 21" / 18") y vibración en ralentí.
-- Herencia común en `CarEntity`, `CarItem` y `CarEngineSound` para compartir colisiones, inventario, combustible, atropellos (`runOver`) y sonido de motor parametrizado entre todos los vehículos.
+- Modelo 3D y renderizador nativo (`MotorcycleModels`) en dos capas con horquilla inclinada (*rake* -24°), ruedas de radios (rin 21" / 18") y vibración en ralentí.
+- Base común (`MotorVehicleEntity`, `VehicleItem`, `EngineSound`) para compartir colisiones, inventario, combustible, atropellos (`runOver`) y sonido de motor parametrizado entre todos los vehículos.
 
 ## [1.0.0] - 2026-11-10
 

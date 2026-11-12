@@ -18,21 +18,21 @@ public class EngineSound extends AbstractTickableSoundInstance {
 
     private static final float IDLE_VOLUME = 0.35F; // fracción del volumen configurado en ralentí
 
-    private final MotorVehicleEntity car;
+    private final MotorVehicleEntity vehicle;
 
-    public EngineSound(MotorVehicleEntity car) {
+    public EngineSound(MotorVehicleEntity vehicle) {
         super(SoundEvents.MINECART_RIDING, SoundSource.NEUTRAL, SoundInstance.createUnseededRandom());
-        this.car = car;
+        this.vehicle = vehicle;
         this.looping = true;
         this.delay = 0;
         this.volume = 0.0F;
-        this.pitch = car.spec().idlePitch();
+        this.pitch = vehicle.spec().idlePitch();
         follow();
     }
 
     @Override
     public boolean canPlaySound() {
-        return !this.car.isSilent();
+        return !this.vehicle.isSilent();
     }
 
     @Override
@@ -42,24 +42,24 @@ public class EngineSound extends AbstractTickableSoundInstance {
 
     @Override
     public void tick() {
-        if (this.car.isRemoved()) {
+        if (this.vehicle.isRemoved()) {
             stop();
             return;
         }
         follow();
 
-        float ratio = (float) this.car.speedRatio();
-        float targetVolume = this.car.isEngineRunning()
+        float ratio = (float) this.vehicle.speedRatio();
+        float targetVolume = this.vehicle.isEngineRunning()
                 ? GarageConfig.get().engineVolume() * Mth.lerp(ratio, IDLE_VOLUME, 1.0F)
                 : 0.0F;
         // Suavizado: el motor no se prende ni cambia de tono de golpe
         this.volume = Mth.lerp(0.2F, this.volume, targetVolume);
-        this.pitch = Mth.lerp(0.2F, this.pitch, Mth.lerp(ratio, this.car.spec().idlePitch(), this.car.spec().topPitch()));
+        this.pitch = Mth.lerp(0.2F, this.pitch, Mth.lerp(ratio, this.vehicle.spec().idlePitch(), this.vehicle.spec().topPitch()));
     }
 
     private void follow() {
-        this.x = this.car.getX();
-        this.y = this.car.getY();
-        this.z = this.car.getZ();
+        this.x = this.vehicle.getX();
+        this.y = this.vehicle.getY();
+        this.z = this.vehicle.getZ();
     }
 }

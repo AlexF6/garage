@@ -28,6 +28,16 @@ public final class MotocarroModels {
     private static final String CHASSIS = "chassis";
     private static final String STEERING = "steering";
 
+    // Ralentí: vibración solo con el motor encendido y casi detenido
+    private static final float IDLE_SPEED_RATIO = 0.05F;     // por debajo de esta fracción de la velocidad máxima
+    private static final float IDLE_BUZZ_SPEED = 1.6F;       // rad por tick de edad
+    private static final float IDLE_BUZZ_AMPLITUDE = 0.02F;  // rad de la vibración lateral
+    private static final float IDLE_BOB_SPEED = 3.2F;        // rad por tick de edad
+    private static final float IDLE_BOB_AMPLITUDE_PX = 0.12F; // píxeles del temblor vertical
+    private static final float IDLE_PITCH_SHARE = 0.5F;      // parte de la vibración que pasa al cabeceo
+    /** Balanceo (rad) hacia fuera de la curva con la dirección y la velocidad al máximo; crece con la velocidad². */
+    private static final float BODY_ROLL_AT_FULL_STEER = 0.22F;
+
     private static ModelLayerLocation layer(String name) {
         return ModelKit.layer("motocarro", name);
     }
@@ -179,15 +189,15 @@ public final class MotocarroModels {
 
             // Suspensión, ralentí (solo con motor encendido) y balanceo centrífugo hacia el exterior de la curva
             float heavePx = -state.bodyHeave * 16.0F;
-            if (state.isEngineRunning && state.speedRatio < 0.05F) {
-                float idleBuzz = (float) Math.sin(state.ageInTicks * 1.6F) * 0.02F;
-                this.chassis.y = 24.0F + heavePx + ((float) Math.cos(state.ageInTicks * 3.2F) * 0.12F);
-                this.chassis.xRot = state.bodyPitch + idleBuzz * 0.5F;
+            if (state.isEngineRunning && state.speedRatio < IDLE_SPEED_RATIO) {
+                float idleBuzz = (float) Math.sin(state.ageInTicks * IDLE_BUZZ_SPEED) * IDLE_BUZZ_AMPLITUDE;
+                this.chassis.y = 24.0F + heavePx + ((float) Math.cos(state.ageInTicks * IDLE_BOB_SPEED) * IDLE_BOB_AMPLITUDE_PX);
+                this.chassis.xRot = state.bodyPitch + idleBuzz * IDLE_PITCH_SHARE;
                 this.chassis.zRot = idleBuzz;
             } else {
                 this.chassis.y = 24.0F + heavePx;
                 this.chassis.xRot = state.bodyPitch;
-                this.chassis.zRot = -state.steer * (state.speedRatio * state.speedRatio) * 0.22F;
+                this.chassis.zRot = -state.steer * (state.speedRatio * state.speedRatio) * BODY_ROLL_AT_FULL_STEER;
             }
         }
     }

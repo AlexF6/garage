@@ -54,8 +54,8 @@ public class GarageClient implements ClientModInitializer {
 
         // Un sonido de motor por vehículo cargado; se detiene solo cuando el vehículo desaparece
         ClientEntityEvents.ENTITY_LOAD.register((entity, level) -> {
-            if (entity instanceof MotorVehicleEntity car) {
-                Minecraft.getInstance().getSoundManager().play(new EngineSound(car));
+            if (entity instanceof MotorVehicleEntity vehicle) {
+                Minecraft.getInstance().getSoundManager().play(new EngineSound(vehicle));
             }
         });
 
@@ -64,9 +64,9 @@ public class GarageClient implements ClientModInitializer {
             LocalPlayer player = client.player;
             if (player == null) return;
 
-            if (player.getVehicle() instanceof MotorVehicleEntity car && car.getControllingPassenger() == player) {
+            if (player.getVehicle() instanceof MotorVehicleEntity vehicle && vehicle.getControllingPassenger() == player) {
                 Input keys = player.input.keyPresses;
-                car.setInput(VehicleInput.of(keys.left(), keys.right(), keys.forward(), keys.backward(), keys.jump()));
+                vehicle.setInput(VehicleInput.of(keys.left(), keys.right(), keys.forward(), keys.backward(), keys.jump()));
                 while (HORN.consumeClick()) {
                     ClientPlayNetworking.send(new HornPayload());
                 }

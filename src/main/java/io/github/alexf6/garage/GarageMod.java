@@ -26,8 +26,8 @@ public class GarageMod implements ModInitializer {
             }
         });
         ServerPlayNetworking.registerGlobalReceiver(HornPayload.TYPE, (payload, context) -> {
-            if (context.player().getVehicle() instanceof MotorVehicleEntity car) {
-                car.honk(context.player());
+            if (context.player().getVehicle() instanceof MotorVehicleEntity vehicle) {
+                vehicle.honk(context.player());
             }
         });
 
