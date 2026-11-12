@@ -23,7 +23,7 @@ dependencies {
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	// Pruebas de la física pura (paquete physics), sin arrancar Minecraft
-	testImplementation platform("org.junit:junit-bom:5.14.4")
+	testImplementation platform("org.junit:junit-bom:${project.junit_version}")
 	testImplementation "org.junit.jupiter:junit-jupiter"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
@@ -71,7 +71,8 @@ tasks.withType(AbstractArchiveTask).configureEach {
 }
 
 // Copia opcional del jar a una carpeta de mods. No se hace nada por defecto: el build solo escribe dentro de
-// este proyecto. Para activarlo, define la ruta en tu ~/.gradle/gradle.properties (no en el repo) o con -PmodsDir=...
+// este proyecto, y estas tareas nunca cuelgan de assemble/build: se piden a mano (./gradlew installMod).
+// Para activarlas, define la ruta en tu ~/.gradle/gradle.properties (no en el repo) o con -PmodsDir=...
 //   modsDir=/ruta/a/minecraft/mods     <- además de copiar, borra los jars anteriores de este mod en esa carpeta
 //   exportDir=/ruta/donde/dejar/copia  <- copia adicional del jar
 def modsDir = providers.gradleProperty("modsDir").orNull
@@ -89,7 +90,6 @@ if (modsDir) {
 		from tasks.named("jar").flatMap { it.archiveFile }
 		into modsDir
 	}
-	tasks.named("assemble") { finalizedBy tasks.named("installMod") }
 }
 
 if (exportDir) {
@@ -100,7 +100,6 @@ if (exportDir) {
 		from tasks.named("jar").flatMap { it.archiveFile }
 		into exportDir
 	}
-	tasks.named("assemble") { finalizedBy tasks.named("exportMod") }
 }
 
 publishing {
