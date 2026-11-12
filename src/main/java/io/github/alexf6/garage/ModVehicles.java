@@ -46,11 +46,11 @@ public final class ModVehicles {
     }
 
     public static EntityType<MotorVehicleEntity> entityType(VehicleSpec spec) {
-        return registered.get(spec.id()).entityType();
+        return lookup(spec).entityType();
     }
 
     public static Item item(VehicleSpec spec) {
-        return registered.get(spec.id()).item();
+        return lookup(spec).item();
     }
 
     /** Ítem de un vehículo que conserva el color de la carrocería (componente vanilla dyed_color). */
@@ -60,6 +60,15 @@ public final class ModVehicles {
             stack.set(DataComponents.DYED_COLOR, new DyedItemColor(rgb));
         }
         return stack;
+    }
+
+    private static Registered lookup(VehicleSpec spec) {
+        Registered found = registered.get(spec.id());
+        if (found == null) {
+            throw new IllegalStateException("El vehículo " + spec.id()
+                    + " no está registrado: ModVehicles.register() no se ha ejecutado o no lo incluye VehicleSpecs.ALL");
+        }
+        return found;
     }
 
     private static EntityType<MotorVehicleEntity> registerEntity(VehicleSpec spec) {
