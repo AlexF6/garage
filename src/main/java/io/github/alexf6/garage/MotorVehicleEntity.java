@@ -69,12 +69,13 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
     private int lastFuelPercent = -1;
     private int hornCooldown;
 
-    private final VehicleAnimation animation = new VehicleAnimation();
+    private final VehicleAnimation animation;
     private double forwardSpeed; // observada (bloques/tick); la usan el sonido, la animación y el empuje
 
     public MotorVehicleEntity(EntityType<? extends MotorVehicleEntity> type, Level level, VehicleSpec spec) {
         super(type, level, spec.containerRows());
         this.spec = spec;
+        this.animation = new VehicleAnimation(spec.wheelRadius(), spec.leanPerSteer());
         // Los datos sincronizados se definen en el constructor de Entity, antes de que exista el spec
         this.entityData.set(DATA_COLOR, spec.defaultColor());
     }
@@ -212,8 +213,7 @@ public class MotorVehicleEntity extends ChestVehicleEntity {
         double longAccel = forward - this.forwardSpeed;
         this.forwardSpeed = forward;
         if (level().isClientSide()) {
-            animation.tick(forward, longAccel, deltaRotation, getY() - this.yo, spec.wheelRadius(),
-                    spec.leanPerSteer(), tuning());
+            animation.tick(forward, longAccel, deltaRotation, getY() - this.yo, tuning());
         }
     }
 

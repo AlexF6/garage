@@ -46,7 +46,7 @@ public final class ModVehicles {
     }
 
     /** Si {@link #register()} ya se ejecutó en esta JVM. */
-    public static boolean isRegistered() {
+    static boolean isRegistered() {
         return !registered.isEmpty();
     }
 

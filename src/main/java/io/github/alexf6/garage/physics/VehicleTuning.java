@@ -29,50 +29,50 @@ public record VehicleTuning(
 ) {
     /** Jeep Willys: ~43 km/h, buena maniobra a baja velocidad, dirección más firme a alta. */
     public static final VehicleTuning WILLYS = new VehicleTuning(
-            0.6, 0.2,
-            0.03, 0.02,
-            0.04, 0.035,
-            0.98, 0.995, 0.85,
-            1.75,
-            0.6, 0.2,
-            0.1,
-            0.3, 0.92, 1.6
+            0.6, 0.2,  // maxSpeed, maxReverse
+            0.03, 0.02,  // accel, reverseAccel
+            0.04, 0.035,  // brake, handbrake
+            0.98, 0.995, 0.85,  // rollingFriction, airDrag, waterDrag
+            1.75,  // wheelBase
+            0.6, 0.2,  // maxSteerLow, maxSteerHigh
+            0.1,  // steerRate
+            0.3, 0.92, 1.6  // grip, driftGrip, driftYawBoost
     );
 
     /** Moto enduro/dual-sport (Yamaha XTZ 125): ligera (~118 kg), ~68 km/h (0.92 b/t), alto torque y giro cerrado. */
     public static final VehicleTuning ENDURO = new VehicleTuning(
-            0.92, 0.18,
-            0.050, 0.02,
-            0.055, 0.05,
-            0.985, 0.992, 0.70,
-            1.25,
-            0.78, 0.36,
-            0.24,
-            0.16, 0.88, 1.8
+            0.92, 0.18,  // maxSpeed, maxReverse
+            0.050, 0.02,  // accel, reverseAccel
+            0.055, 0.05,  // brake, handbrake
+            0.985, 0.992, 0.70,  // rollingFriction, airDrag, waterDrag
+            1.25,  // wheelBase
+            0.78, 0.36,  // maxSteerLow, maxSteerHigh
+            0.24,  // steerRate
+            0.16, 0.88, 1.8  // grip, driftGrip, driftYawBoost
     );
 
     /** Motocarro urbano (Bajaj RE / "Torito"): ligero-medio, ~52 km/h (0.72 b/t), radio cerrado. */
     public static final VehicleTuning MOTOCARRO = new VehicleTuning(
-            0.72, 0.18,
-            0.038, 0.018,
-            0.045, 0.040,
-            0.982, 0.993, 0.75,
-            1.50,
-            0.72, 0.28,
-            0.18,
-            0.22, 0.90, 1.7
+            0.72, 0.18,  // maxSpeed, maxReverse
+            0.038, 0.018,  // accel, reverseAccel
+            0.045, 0.040,  // brake, handbrake
+            0.982, 0.993, 0.75,  // rollingFriction, airDrag, waterDrag
+            1.50,  // wheelBase
+            0.72, 0.28,  // maxSteerLow, maxSteerHigh
+            0.18,  // steerRate
+            0.22, 0.90, 1.7  // grip, driftGrip, driftYawBoost
     );
 
     /** Trimoto de carga / Motocarguero 200cc: pesado con platón metálico, ~47 km/h (0.65 b/t), alto torque y tracción posterior. */
     public static final VehicleTuning MOTOCARGUERO = new VehicleTuning(
-            0.65, 0.18,
-            0.042, 0.018,
-            0.045, 0.040,
-            0.982, 0.993, 0.75,
-            1.70,
-            0.70, 0.25,
-            0.16,
-            0.26, 0.88, 1.6
+            0.65, 0.18,  // maxSpeed, maxReverse
+            0.042, 0.018,  // accel, reverseAccel
+            0.045, 0.040,  // brake, handbrake
+            0.982, 0.993, 0.75,  // rollingFriction, airDrag, waterDrag
+            1.70,  // wheelBase
+            0.70, 0.25,  // maxSteerLow, maxSteerHigh
+            0.16,  // steerRate
+            0.26, 0.88, 1.6  // grip, driftGrip, driftYawBoost
     );
 
     /** Número de parámetros de {@link #toArray()}. */

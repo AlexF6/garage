@@ -18,6 +18,23 @@ public final class VehicleAnimation {
     private float lean;
     private float leanO;
     private final Suspension suspension = new Suspension();
+    private final double wheelRadius;
+    private final float leanPerSteer;
+
+    /**
+     * @param wheelRadius  radio de las ruedas (bloques, positivo); fija cuánto giran al avanzar
+     * @param leanPerSteer inclinación por radián de dirección a velocidad máxima; 0 = no se inclina
+     */
+    public VehicleAnimation(double wheelRadius, float leanPerSteer) {
+        if (!(wheelRadius > 0.0)) {
+            throw new IllegalArgumentException("wheelRadius debe ser positivo: " + wheelRadius);
+        }
+        if (!(leanPerSteer >= 0.0F)) {
+            throw new IllegalArgumentException("leanPerSteer no puede ser negativo: " + leanPerSteer);
+        }
+        this.wheelRadius = wheelRadius;
+        this.leanPerSteer = leanPerSteer;
+    }
 
     /**
      * Avanza un tick: rodado = distancia / radio; dirección = inversa del modelo de giro; suspensión según las
@@ -27,11 +44,10 @@ public final class VehicleAnimation {
      * @param longAccel    cambio de {@code forward} respecto al tick anterior
      * @param yawDeltaDeg  giro del tick (grados)
      * @param dy           cambio de altura del tick (bloques)
-     * @param wheelRadius  radio de las ruedas (bloques)
-     * @param leanPerSteer inclinación por radián de dirección a velocidad máxima; 0 = no se inclina
+     * @param tuning       manejo del vehículo: da la velocidad máxima y el giro con que se normalizan la dirección
+     *                     y la inclinación
      */
-    public void tick(double forward, double longAccel, float yawDeltaDeg, double dy, double wheelRadius,
-                     float leanPerSteer, VehicleTuning tuning) {
+    public void tick(double forward, double longAccel, float yawDeltaDeg, double dy, VehicleTuning tuning) {
         suspension.tick(longAccel, forward * Math.toRadians(yawDeltaDeg), dy);
 
         wheelRollO = wheelRoll;
