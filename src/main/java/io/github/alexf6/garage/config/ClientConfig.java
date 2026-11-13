@@ -21,10 +21,10 @@ import java.util.List;
  * <p>Mismas reglas que {@link GarageConfig}: lo que falta toma el valor por defecto, lo que se sale de rango se
  * corrige y se avisa, y un archivo corrupto se guarda como {@code .bak} y se regenera.
  *
- * <p>Migración: {@code engineVolume} vivía en {@code garage.json}. Al cargar esa config, {@link LegacyConfigMigration}
- * crea este archivo con el valor que había allí si todavía no existe; así no depende del orden en que arranquen el
- * servidor y el cliente. El cliente es el único que lee este archivo, aunque un servidor dedicado que aún tenga la
- * clave antigua lo crea una vez durante esa migración.
+ * <p>Migración: {@code engineVolume} vivía en {@code garage.json}. Si este archivo todavía no existe, se crea con el
+ * valor que haya allí, tanto al cargar esta config ({@link #load}) como al cargar la del servidor
+ * ({@link LegacyConfigMigration}); así da igual cuál arranque primero. El cliente es el único que lee este
+ * archivo, aunque un servidor dedicado que aún tenga la clave antigua lo crea una vez durante esa migración.
  *
  * @param engineVolume volumen del motor, de 0 (apagado) a 1
  */
@@ -47,7 +47,13 @@ public record ClientConfig(float engineVolume) {
     public static void load(Path file) {
         ClientConfig parsed = DEFAULT;
         try {
-            if (Files.exists(file)) {
+            if (!Files.exists(file)) {
+                // Primer arranque: si garage.json aún trae el volumen antiguo, se parte de él (y no se pierde si
+                // esta config se carga antes que la del servidor)
+                Path legacyFile = file.resolveSibling(GarageConfig.FILE_NAME);
+                Float legacy = LegacyConfigMigration.readLegacyEngineVolume(legacyFile);
+                if (legacy != null) parsed = new ClientConfig(legacy);
+            } else {
                 try {
                     parsed = parse(JsonParser.parseString(Files.readString(file)).getAsJsonObject());
                 } catch (JsonParseException | IllegalStateException | CharacterCodingException e) {
@@ -63,7 +69,7 @@ public record ClientConfig(float engineVolume) {
 
         List<String> fixes = new ArrayList<>();
         current = sanitize(parsed, fixes);
-        fixes.forEach(fix -> GarageMod.LOGGER.warn("garage-client.json: {}", fix));
+        fixes.forEach(fix -> GarageMod.LOGGER.warn("{}: {}", FILE_NAME, fix));
         write(file, current);
     }
 

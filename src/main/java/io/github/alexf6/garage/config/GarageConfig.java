@@ -7,8 +7,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import io.github.alexf6.garage.GarageMod;
-import io.github.alexf6.garage.network.SyncedTunings;
-import io.github.alexf6.garage.network.TuningSyncPayload;
 import io.github.alexf6.garage.physics.RunOverRules;
 import io.github.alexf6.garage.physics.VehicleTuning;
 import java.io.IOException;
@@ -27,8 +25,8 @@ import java.util.Map;
  * <p>Los valores fuera de rango se corrigen al límite y se avisan en el log. Un archivo ilegible como JSON se
  * guarda como {@code garage.json.bak} y se regenera con los valores por defecto.
  *
- * <p>En multijugador el servidor manda al conectar el manejo de cada vehículo ({@link TuningSyncPayload}) y el
- * cliente lo usa en lugar del suyo ({@link SyncedTunings}); las motos usan perfiles fijos del mod.
+ * <p>En multijugador el servidor manda al conectar el manejo de cada vehículo ({@code TuningSyncPayload}) y el
+ * cliente lo usa en lugar del suyo ({@code SyncedTunings}); las motos usan perfiles fijos del mod.
  *
  * @param maxFuel      ticks de acelerador con el tanque lleno, de 1 a {@value #MAX_FUEL_LIMIT}
  * @param fuelPerItem  ticks que suma cada unidad de combustible, de 0 a {@code maxFuel}
@@ -43,6 +41,9 @@ public record GarageConfig(int maxFuel, int fuelPerItem, VehicleTuning tuning, R
     public static final double DAMAGE_PER_SPEED_LIMIT = 1000.0;
     /** Tope de la fuerza del empuje. */
     public static final double KNOCKBACK_LIMIT = 10.0;
+
+    /** Nombre del archivo dentro de {@code config/}. */
+    public static final String FILE_NAME = GarageMod.MOD_ID + ".json";
 
     public static final GarageConfig DEFAULT = new GarageConfig(12000, 1600, VehicleTuning.WILLYS,
             new RunOverRules(true, 0.1, 0.25, 25.0, 1.2, false));
@@ -103,7 +104,6 @@ public record GarageConfig(int maxFuel, int fuelPerItem, VehicleTuning tuning, R
         if (rewrite) write(file, current);
     }
 
-    /** Archivo corrupto: se conserva como {@code .bak} para que el jugador lo recupere y se crea uno nuevo. */
     /** Archivo corrupto: se conserva como {@code .bak} para que el jugador lo recupere y se crea uno nuevo. */
     private static void backUpAndRegenerate(Path file, Exception cause) {
         current = DEFAULT;

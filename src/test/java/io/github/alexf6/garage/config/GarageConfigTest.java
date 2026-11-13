@@ -21,8 +21,10 @@ class GarageConfigTest {
 
     @AfterEach
     void reset() throws Exception {
-        ClientConfig.load(dir.resolve("vacio-cliente.json"));
-        GarageConfig.load(dir.resolve("vacio.json"));
+        // Carpeta limpia: sin garage.json, para que el reinicio no migre un volumen antiguo
+        Path clean = Files.createDirectories(dir.resolve("limpia"));
+        ClientConfig.load(clean.resolve("garage-client.json"));
+        GarageConfig.load(clean.resolve("garage.json"));
     }
 
     @Test
@@ -146,6 +148,38 @@ class GarageConfigTest {
         assertTrue(Files.exists(client), "se creó junto al archivo del servidor");
         ClientConfig.load(client);
         assertEquals(0.25F, ClientConfig.get().engineVolume());
+    }
+
+    @Test
+    void siElClienteArrancaPrimeroTambienHeredaElVolumenAntiguo() throws Exception {
+        Path file = dir.resolve("garage.json");
+        Files.writeString(file, "{\"maxFuel\": 500, \"engineVolume\": 0.25}");
+        Path client = dir.resolve(ClientConfig.FILE_NAME);
+        ClientConfig.load(client);
+        assertEquals(0.25F, ClientConfig.get().engineVolume(), "el cliente parte del volumen antiguo");
+        assertTrue(Files.readString(file).contains("engineVolume"), "el cliente nunca toca garage.json");
+
+        GarageConfig.load(file);
+        assertFalse(Files.readString(file).contains("engineVolume"));
+        ClientConfig.load(client);
+        assertEquals(0.25F, ClientConfig.get().engineVolume(), "el volumen no se pierde en ningún orden");
+    }
+
+    @Test
+    void elClienteIgnoraUnGarageJsonIlegibleONoNumerico() throws Exception {
+        Path file = dir.resolve("garage.json");
+        Path client = dir.resolve(ClientConfig.FILE_NAME);
+        for (String content : new String[] {"{ no es json", "[1, 2]", "{\"engineVolume\": \"fuerte\"}", ""}) {
+            Files.deleteIfExists(client);
+            Files.writeString(file, content);
+            ClientConfig.load(client);
+            assertEquals(ClientConfig.DEFAULT, ClientConfig.get(), content);
+            assertEquals(content, Files.readString(file), "el cliente no toca garage.json: " + content);
+        }
+        Files.write(file, new byte[] {(byte) 0xFF, (byte) 0xFE, 0x00}); // no es UTF-8
+        Files.deleteIfExists(client);
+        ClientConfig.load(client);
+        assertEquals(ClientConfig.DEFAULT, ClientConfig.get());
     }
 
     @Test

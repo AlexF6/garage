@@ -19,8 +19,8 @@ class ClientConfigTest {
     Path dir;
 
     @AfterEach
-    void reset() {
-        ClientConfig.load(dir.resolve("vacio.json"));
+    void reset() throws Exception {
+        ClientConfig.load(Files.createDirectories(dir.resolve("limpia")).resolve("garage-client.json"));
     }
 
     @Test

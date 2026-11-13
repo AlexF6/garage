@@ -17,7 +17,7 @@ public class GarageMod implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        GarageConfig.load(FabricLoader.getInstance().getConfigDir().resolve(MOD_ID + ".json"));
+        GarageConfig.load(FabricLoader.getInstance().getConfigDir().resolve(GarageConfig.FILE_NAME));
         ModVehicles.register();
 
         PayloadTypeRegistry.serverboundPlay().register(HornPayload.TYPE, HornPayload.CODEC);
