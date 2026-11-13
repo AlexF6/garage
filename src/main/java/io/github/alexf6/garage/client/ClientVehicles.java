@@ -22,25 +22,22 @@ final class ClientVehicles {
     /** Modelo de un vehículo: sus dos capas y cómo se animan. */
     record Model(VehicleRenderer.Look look, Supplier<LayerDefinition> bodyLayer, Supplier<LayerDefinition> trimLayer) {}
 
+    /** Lo que hace falta para registrar el modelo de un vehículo: sus capas y la pieza que lo anima. */
+    record ModelDef(ModelLayerLocation body, ModelLayerLocation trim,
+                    Function<ModelPart, EntityModel<VehicleRenderState>> part,
+                    Supplier<LayerDefinition> bodyLayer, Supplier<LayerDefinition> trimLayer) {}
+
     private static final Map<String, Model> MODELS = Map.ofEntries(
-            entry(VehicleSpecs.CAR, 0.9F, CarModels.BODY, CarModels.TRIM, CarModels.Part::new,
-                    CarModels::createBodyLayer, CarModels::createTrimLayer),
-            entry(VehicleSpecs.MOTORCYCLE, 0.5F, MotorcycleModels.BODY, MotorcycleModels.TRIM,
-                    MotorcycleModels.Part::new, MotorcycleModels::createBodyLayer, MotorcycleModels::createTrimLayer),
-            entry(VehicleSpecs.MOTOCARRO, 0.75F, MotocarroModels.BODY, MotocarroModels.TRIM,
-                    MotocarroModels.Part::new, MotocarroModels::createBodyLayer, MotocarroModels::createTrimLayer),
-            entry(VehicleSpecs.MOTOCARGUERO, 0.8F, MotocargueroModels.BODY, MotocargueroModels.TRIM,
-                    MotocargueroModels.Part::new, MotocargueroModels::createBodyLayer,
-                    MotocargueroModels::createTrimLayer));
+            entry(VehicleSpecs.CAR, 0.9F, CarModels.DEF),
+            entry(VehicleSpecs.MOTORCYCLE, 0.5F, MotorcycleModels.DEF),
+            entry(VehicleSpecs.MOTOCARRO, 0.75F, MotocarroModels.DEF),
+            entry(VehicleSpecs.MOTOCARGUERO, 0.8F, MotocargueroModels.DEF));
 
     /** La textura de entidad es {@code textures/entity/<id>.png}: sale del id del spec, no se repite a mano. */
-    private static Map.Entry<String, Model> entry(VehicleSpec spec, float shadowRadius, ModelLayerLocation body,
-                                                  ModelLayerLocation trim,
-                                                  Function<ModelPart, EntityModel<VehicleRenderState>> part,
-                                                  Supplier<LayerDefinition> bodyLayer,
-                                                  Supplier<LayerDefinition> trimLayer) {
-        VehicleRenderer.Look look = new VehicleRenderer.Look(texture(spec.id()), shadowRadius, body, trim, part);
-        return Map.entry(spec.id(), new Model(look, bodyLayer, trimLayer));
+    private static Map.Entry<String, Model> entry(VehicleSpec spec, float shadowRadius, ModelDef def) {
+        VehicleRenderer.Look look = new VehicleRenderer.Look(texture(spec.id()), shadowRadius, def.body(), def.trim(),
+                def.part());
+        return Map.entry(spec.id(), new Model(look, def.bodyLayer(), def.trimLayer()));
     }
 
     static Model lookOf(VehicleSpec spec) {

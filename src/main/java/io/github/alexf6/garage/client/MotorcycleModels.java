@@ -30,6 +30,9 @@ public final class MotorcycleModels {
 
     public static final ModelLayerLocation BODY = layer("body");
     public static final ModelLayerLocation TRIM = layer("trim");
+    /** Lo que {@link ClientVehicles} necesita para registrar este modelo. */
+    static final ClientVehicles.ModelDef DEF = new ClientVehicles.ModelDef(BODY, TRIM, Part::new,
+            MotorcycleModels::createBodyLayer, MotorcycleModels::createTrimLayer);
 
     private static final String LEAN_ROOT = "lean_root";
     private static final String CHASSIS = "chassis";

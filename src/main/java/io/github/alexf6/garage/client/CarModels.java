@@ -24,6 +24,9 @@ public final class CarModels {
 
     public static final ModelLayerLocation BODY = layer("body");
     public static final ModelLayerLocation TRIM = layer("trim");
+    /** Lo que {@link ClientVehicles} necesita para registrar este modelo. */
+    static final ClientVehicles.ModelDef DEF = new ClientVehicles.ModelDef(BODY, TRIM, Part::new,
+            CarModels::createBodyLayer, CarModels::createTrimLayer);
 
     public static final String[] WHEELS = {"wheel_fl", "wheel_fr", "wheel_bl", "wheel_br"};
     private static final int FRONT_WHEELS = 2; // las primeras de WHEELS

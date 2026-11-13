@@ -32,6 +32,9 @@ public final class MotocargueroModels {
 
     public static final ModelLayerLocation BODY = layer("body");
     public static final ModelLayerLocation TRIM = layer("trim");
+    /** Lo que {@link ClientVehicles} necesita para registrar este modelo. */
+    static final ClientVehicles.ModelDef DEF = new ClientVehicles.ModelDef(BODY, TRIM, Part::new,
+            MotocargueroModels::createBodyLayer, MotocargueroModels::createTrimLayer);
 
     private static final String CHASSIS = "chassis";
     private static final String STEERING = "steering";
@@ -280,17 +283,7 @@ public final class MotocargueroModels {
             ModelKit.spinWheels(wheels, state.wheelRoll, 0.0F, 0);
 
             // Suspensión, ralentí y balanceo centrífugo de triciclo delta
-            float heavePx = ModelKit.heavePx(state.bodyHeave);
-            if (state.isEngineRunning && state.speedRatio < ModelKit.IDLE_SPEED_RATIO) {
-                float idleBuzz = IDLE.sway(state.ageInTicks);
-                this.chassis.y = 24.0F + heavePx + IDLE.bobPx(state.ageInTicks);
-                this.chassis.xRot = state.bodyPitch + idleBuzz * IDLE.pitchShare();
-                this.chassis.zRot = idleBuzz * IDLE_ROLL_SHARE;
-            } else {
-                this.chassis.y = 24.0F + heavePx;
-                this.chassis.xRot = state.bodyPitch;
-                this.chassis.zRot = -state.steer * (state.speedRatio * state.speedRatio) * BODY_ROLL_AT_FULL_STEER;
-            }
+            ModelKit.moveChassis(this.chassis, state, IDLE, IDLE_ROLL_SHARE, BODY_ROLL_AT_FULL_STEER);
         }
     }
 

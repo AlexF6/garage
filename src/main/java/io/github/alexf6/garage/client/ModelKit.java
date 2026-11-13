@@ -12,6 +12,15 @@ import net.minecraft.util.Mth;
 /** Atajos comunes de los modelos de cubos de los vehículos. */
 final class ModelKit {
 
+    /** Píxeles del modelo por bloque: el eje Y del modelo apunta hacia abajo y mide en píxeles, la física en bloques. */
+    static final float PIXELS_PER_BLOCK = 16.0F;
+
+    /** Altura (píxeles del modelo) del suelo: el origen de los modelos está en y = 24. */
+    static final float GROUND_Y_PX = 24.0F;
+
+    /** Por debajo de esta fracción de la velocidad máxima el motor encendido "ralentiza" y el modelo vibra. */
+    static final float IDLE_SPEED_RATIO = 0.05F;
+
     /** Capa {@code layer} del modelo {@code model}, bajo el espacio de nombres del mod. */
     static ModelLayerLocation layer(String model, String layer) {
         return new ModelLayerLocation(Identifier.fromNamespaceAndPath(GarageMod.MOD_ID, model), layer);
@@ -26,9 +35,6 @@ final class ModelKit {
     static PartPose at(float x, float y, float z) {
         return PartPose.offset(x, y, z);
     }
-
-    /** Píxeles del modelo por bloque: el eje Y del modelo apunta hacia abajo y mide en píxeles, la física en bloques. */
-    static final float PIXELS_PER_BLOCK = 16.0F;
 
     /** Hijo {@code name} de {@code parent}, o {@code null} si esta capa del modelo no lo tiene (BODY y TRIM se reparten las piezas). */
     static ModelPart childOrNull(ModelPart parent, String name) {
@@ -50,9 +56,6 @@ final class ModelKit {
             wheels[i].yRot = i < steered ? steer : 0.0F;
         }
     }
-
-    /** Por debajo de esta fracción de la velocidad máxima el motor encendido "ralentiza" y el modelo vibra. */
-    static final float IDLE_SPEED_RATIO = 0.05F;
 
     /**
      * Vibración de ralentí de un motor: un vaivén (radianes) y un temblor vertical (píxeles) que dependen de la edad
@@ -77,6 +80,31 @@ final class ModelKit {
     /** Desplazamiento vertical de la suspensión (rebote) en píxeles del modelo; positivo hacia abajo. */
     static float heavePx(float bodyHeave) {
         return -bodyHeave * PIXELS_PER_BLOCK;
+    }
+
+    /**
+     * Mueve el chasis de un vehículo de tres ruedas: rebote de la suspensión y cabeceo; con el motor encendido y casi
+     * parado, la vibración de ralentí; en marcha, el balanceo centrífugo hacia el exterior de la curva.
+     *
+     * @param chassis         pieza que se mueve (su origen está en el suelo)
+     * @param state           estado de render: motor, velocidad, dirección, cabeceo y rebote
+     * @param idle            vibración de ralentí propia del modelo
+     * @param idleRollShare   parte del vaivén de ralentí que pasa al balanceo lateral del chasis
+     * @param rollAtFullSteer balanceo (radianes) con la dirección y la velocidad al máximo; crece con la velocidad²
+     */
+    static void moveChassis(ModelPart chassis, VehicleRenderer.VehicleRenderState state, IdleVibration idle,
+                            float idleRollShare, float rollAtFullSteer) {
+        float heavePx = heavePx(state.bodyHeave);
+        if (state.isEngineRunning && state.speedRatio < IDLE_SPEED_RATIO) {
+            float idleBuzz = idle.sway(state.ageInTicks);
+            chassis.y = GROUND_Y_PX + heavePx + idle.bobPx(state.ageInTicks);
+            chassis.xRot = state.bodyPitch + idleBuzz * idle.pitchShare();
+            chassis.zRot = idleBuzz * idleRollShare;
+        } else {
+            chassis.y = GROUND_Y_PX + heavePx;
+            chassis.xRot = state.bodyPitch;
+            chassis.zRot = -state.steer * (state.speedRatio * state.speedRatio) * rollAtFullSteer;
+        }
     }
 
     /**

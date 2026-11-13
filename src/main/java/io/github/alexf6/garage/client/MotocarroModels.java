@@ -24,6 +24,9 @@ public final class MotocarroModels {
 
     public static final ModelLayerLocation BODY = layer("body");
     public static final ModelLayerLocation TRIM = layer("trim");
+    /** Lo que {@link ClientVehicles} necesita para registrar este modelo. */
+    static final ClientVehicles.ModelDef DEF = new ClientVehicles.ModelDef(BODY, TRIM, Part::new,
+            MotocarroModels::createBodyLayer, MotocarroModels::createTrimLayer);
 
     public static final String[] WHEELS = {"wheel_front", "wheel_bl", "wheel_br"};
     // Ralentí: la vibración se reparte entre el balanceo lateral (zRot) y el cabeceo
@@ -179,17 +182,7 @@ public final class MotocarroModels {
             }
 
             // Suspensión, ralentí (solo con motor encendido) y balanceo centrífugo hacia el exterior de la curva
-            float heavePx = ModelKit.heavePx(state.bodyHeave);
-            if (state.isEngineRunning && state.speedRatio < ModelKit.IDLE_SPEED_RATIO) {
-                float idleBuzz = IDLE.sway(state.ageInTicks);
-                this.chassis.y = 24.0F + heavePx + IDLE.bobPx(state.ageInTicks);
-                this.chassis.xRot = state.bodyPitch + idleBuzz * IDLE.pitchShare();
-                this.chassis.zRot = idleBuzz;
-            } else {
-                this.chassis.y = 24.0F + heavePx;
-                this.chassis.xRot = state.bodyPitch;
-                this.chassis.zRot = -state.steer * (state.speedRatio * state.speedRatio) * BODY_ROLL_AT_FULL_STEER;
-            }
+            ModelKit.moveChassis(this.chassis, state, IDLE, 1.0F, BODY_ROLL_AT_FULL_STEER);
         }
     }
 
