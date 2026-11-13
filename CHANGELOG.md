@@ -17,9 +17,10 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 - Base común (`MotorVehicleEntity`, `VehicleItem`, `EngineSound`) para compartir colisiones, inventario, combustible, atropellos (`runOver`) y sonido de motor parametrizado entre todos los vehículos.
 
 ### Changed
+- `VehicleAnimation` recibe el radio de rueda y la inclinación al crearse, `ClientVehicles` registra cada modelo con un solo `ModelDef`, `ModelKit.moveChassis` comparte el ralentí y balanceo del motocarro y el motocarguero, y `VehicleTuning` anota el campo de cada número.
 - Las ruedas de radios de la moto y el motocarguero se construyen con `ModelKit.addWheel` en vez de repetir el mismo bloque; la geometría horneada de los cuatro modelos es idéntica.
 - La animación visual sale de `MotorVehicleEntity` a `physics/VehicleAnimation`, con pruebas, y la entidad queda más corta.
-- `engineVolume` pasa de `garage.json` a un `config/garage-client.json` propio, que solo lee el cliente: es un ajuste de cliente y no debía mezclarse con las reglas del servidor. El valor que hubiera en `garage.json` se migra al cargar esa config, sin depender del orden de arranque del cliente y el servidor.
+- `engineVolume` pasa de `garage.json` a un `config/garage-client.json` propio, que solo lee el cliente: es un ajuste de cliente y no debía mezclarse con las reglas del servidor. El valor que hubiera en `garage.json` se copia al cargar cualquiera de las dos configs (la del servidor o la del cliente, si aún no existe `garage-client.json`), así que da igual cuál arranque primero.
 - `GarageConfig` pasa al paquete `config` y los paquetes de red (`HornPayload`, `TuningSyncPayload`, `SyncedTunings`) a `network`, como pide la guía de estructura.
 - La descripción del mod en `fabric.mod.json` pasa a inglés y su traducción (`modmenu.descriptionTranslation.garage`) vive en los tres archivos de idioma.
 - `RunOverRules` (en `physics/`) agrupa la sección `runOver` de la config; `ModelKit.IdleVibration` comparte el ralentí de los modelos; `DismountLocator` ya no cambia la postura del pasajero por su cuenta.
@@ -37,6 +38,7 @@ Todos los cambios notables de este mod se documentan aquí. El formato sigue
 
 ### Fixed
 - La migración de `engineVolume` vive en `LegacyConfigMigration` y no pierde el valor: si no se puede crear `garage-client.json`, `garage.json` se deja intacto y el aviso del log ya no dice que migró. `ConfigFiles` comparte con las dos configs la copia `.bak` y la escritura con aviso.
+- Si el cliente carga su config antes que la del servidor, `garage-client.json` nace con el `engineVolume` que aún tenga `garage.json` en lugar de pisarlo con el valor por defecto.
 - Las criaturas ya no se suben solas a la moto al chocar con ella (`VehicleSpec.mobsCanBoard`).
 - Un valor `null` en una clave simple de `garage.json` (`"maxFuel": null`) conserva el valor por defecto en vez de leerse como 0.
 - `VehicleSpec.Horn` rechaza al crearse una bocina sin sonido o con volumen no positivo, en vez de fallar en el primer bocinazo.

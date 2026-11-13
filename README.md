@@ -46,7 +46,8 @@ el mod está pensado para sumar más vehículos. Hay que tener el mod en cliente
 `config/garage.json` se crea al primer arranque. Las claves que falten se completan con su valor por defecto y el
 archivo se reescribe. Hay que reiniciar el juego (o el servidor) para aplicar cambios.
 
-- Un valor fuera de rango se corrige al límite más cercano, se avisa en el log y el archivo se reescribe ya corregido.
+- Un valor fuera de rango se corrige al límite más cercano, se avisa en el log y el archivo se reescribe ya corregido (salvo si queda pendiente migrar `engineVolume`: ver
+  `garage-client.json` más abajo).
   Un `tuning` inválido se sustituye entero por el manejo por defecto.
 - Si el archivo no es JSON válido (o un valor tiene el tipo equivocado) se guarda como `garage.json.bak`, se crea
   uno nuevo con los valores por defecto y se avisa en el log. Si no se puede leer por permisos, se juega con los
@@ -89,9 +90,9 @@ mismas reglas de validación y copia de seguridad que `garage.json`.
 |---|---|---|---|
 | `engineVolume` | 0.6 | 0 a 1 | Volumen del motor (0 lo apaga) |
 
-`engineVolume` vivía en `garage.json`: al cargar esa config, el valor que tuvieras allí se copia a este archivo si todavía
+`engineVolume` vivía en `garage.json`: al cargar cualquiera de las dos configs (da igual cuál arranque primero), el valor que tuvieras allí se copia a este archivo si todavía
 no existe, y `garage.json` deja de llevarlo. Un servidor dedicado que aún tenga la clave antigua también crea el archivo
-(una vez), aunque no lo lee. Si no se puede crear, `garage.json` se deja como está para no perder el valor. Si
+(una vez), aunque no lo lee. Si no se puede crear, `garage.json` se deja intacto para no perder el valor (y entonces tampoco se escriben en él correcciones ni claves nuevas hasta el siguiente arranque). Si
 `garage.json` está tan dañado que no se puede leer como JSON, el volumen se queda solo en su `.bak`.
 
 El servidor calcula los atropellos con la velocidad que mide entre dos ticks, limitada a la `maxSpeed` del vehículo,
